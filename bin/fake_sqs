@@ -4,24 +4,38 @@ require 'fake_sqs'
 require 'fake_sqs/web_interface'
 require 'optparse'
 
-options = {}
+app = FakeSQS::WebInterface
 
 parser = OptionParser.new do |o|
 
   o.on "-p", "--port PORT", Integer, "Port to use (default: 4567)" do |port|
-    FakeSQS::WebInterface.set :port, port
+    app.set :port, port
   end
 
   o.on "-o", "--bind HOST", "Host to bind to (default: 0.0.0.0)" do |bind|
-    FakeSQS::WebInterface.set :bind, bind
+    app.set :bind, bind
   end
 
   o.on "-s", "--server SERVER", ['thin', 'mongrel', 'webrick'], "Server to use: thin, mongrel or webrick" do |server|
-    FakeSQS::WebInterface.set :server, server
+    app.set :server, server
+  end
+
+  o.on "-v", "--verbose", "Shows input parameters and output XML" do
+    require 'fake_sqs/show_output'
+    app.use FakeSQS::ShowOutput
+  end
+
+  o.on_tail "--version", "Shows the version" do
+    puts "fake_sqs version #{FakeSQS::VERSION}"
+    exit
+  end
+
+  o.on_tail "-h", "--help", "Shows this help page" do
+    puts o
+    exit
   end
 
 end
 
 parser.parse!
-
-FakeSQS::WebInterface.run!
+app.run!

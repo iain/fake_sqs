@@ -10,13 +10,13 @@ describe FakeSQS::ShowOutput do
     app = double :app
     $stdout = StringIO.new
     middleware = FakeSQS::ShowOutput.new(app)
-    env = double :env
+    env = {"rack.input" => ""}
     app.should_receive(:call).with(env).and_return([200, {}, ["<xml>"]])
 
     middleware.call(env)
 
     $stdout.rewind
-    $stdout.read.should eq "<xml>\n"
+    $stdout.read.should eq "--- {}\n\n<xml>\n"
   end
 
 end

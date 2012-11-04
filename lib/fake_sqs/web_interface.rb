@@ -1,12 +1,10 @@
 require 'sinatra/base'
-require 'fake_sqs/show_output'
 
 module FakeSQS
   class WebInterface < Sinatra::Base
 
     configure do
       set :sqs, FakeSQS.server(port: settings.port, host: settings.bind)
-      use ShowOutput
     end
 
     helpers do
