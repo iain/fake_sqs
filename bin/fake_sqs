@@ -16,6 +16,10 @@ parser = OptionParser.new do |o|
     FakeSQS::WebInterface.set :bind, bind
   end
 
+  o.on "-s", "--server SERVER", ['thin', 'mongrel', 'webrick'], "Server to use: thin, mongrel or webrick" do |server|
+    FakeSQS::WebInterface.set :server, server
+  end
+
 end
 
 parser.parse!
