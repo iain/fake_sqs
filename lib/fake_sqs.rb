@@ -21,11 +21,15 @@ module FakeSQS
   end
 
   def self.queue_factory
-    QueueFactory.new(message_factory: message_factory)
+    QueueFactory.new(message_factory: message_factory, queue: queue)
   end
 
   def self.message_factory
     Message
+  end
+
+  def self.queue
+    Queue
   end
 
 end
