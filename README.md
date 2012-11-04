@@ -1,4 +1,4 @@
-# Fake SQS
+# Fake SQS [![Build Status](https://secure.travis-ci.org/iain/fake_sqs.png)](http://travis-ci.org/iain/fake_sqs)
 
 Inspired by [Fake DynamoDB] [fake_dynamo], this is an AWS SQS compatible
 message queue that can be ran locally. This makes it ideal for integration
