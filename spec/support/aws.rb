@@ -17,7 +17,7 @@ class FakeServer
 
   attr_reader :url
 
-  def initialize(url = "http://localhost:4567")
+  def initialize(url = "http://0.0.0.0:4567")
     @url = url
   end
 
@@ -42,7 +42,6 @@ class FakeServer
     @started = true
     @fake_sqs_thread = Thread.new {
       load File.expand_path('../../../bin/fake_sqs', __FILE__)
-      Sinatra::Application.run!
     }
     wait_until_up
   end
