@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'fake_sqs'
-require 'fake_sqs/web_interface'
 require 'optparse'
 
 options = { :port => 4567, :host => "0.0.0.0", :verbose => false }
@@ -48,5 +47,6 @@ end
 app.set :port, options[:port]
 app.set :bind, options[:host]
 app.set :server, options[:server] if options[:server]
-app.set :sqs, FakeSQS.server(port: options[:port], host: options[:host])
+server = FakeSQS.server(port: options[:port], host: options[:host])
+app.set :api, FakeSQS.api(server: server)
 app.run!

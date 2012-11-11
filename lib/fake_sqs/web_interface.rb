@@ -20,21 +20,21 @@ module FakeSQS
     end
 
     delete "/" do
-      settings.sqs.reset
+      settings.api.reset
       200
     end
 
     put "/" do
-      settings.sqs.expire
+      settings.api.expire
       200
     end
 
     post "/" do
-      settings.sqs.call(action, params)
+      settings.api.call(action, params)
     end
 
     post "/:queue" do |queue|
-      settings.sqs.call(action, queue, params)
+      settings.api.call(action, queue, params)
     end
 
   end

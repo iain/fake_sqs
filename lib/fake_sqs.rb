@@ -1,3 +1,4 @@
+require 'fake_sqs/api'
 require 'fake_sqs/catch_errors'
 require 'fake_sqs/error_response'
 require 'fake_sqs/message'
@@ -7,11 +8,20 @@ require 'fake_sqs/queues'
 require 'fake_sqs/responder'
 require 'fake_sqs/server'
 require 'fake_sqs/version'
+require 'fake_sqs/web_interface'
 
 module FakeSQS
 
   def self.server(options = {})
-    Server.new(options.merge(queues: queues, responder: responder))
+    Server.new(options)
+  end
+
+  def self.api(options = {})
+    API.new(
+      server: options.fetch(:server),
+      queues: queues,
+      responder: responder
+    )
   end
 
   def self.queues
