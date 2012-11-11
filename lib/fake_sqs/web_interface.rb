@@ -3,10 +3,6 @@ require 'sinatra/base'
 module FakeSQS
   class WebInterface < Sinatra::Base
 
-    configure do
-      set :sqs, FakeSQS.server(port: settings.port, host: settings.bind)
-    end
-
     helpers do
 
       def action
