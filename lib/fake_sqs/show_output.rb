@@ -1,3 +1,5 @@
+require 'rack/request'
+
 module FakeSQS
   class ShowOutput
 
