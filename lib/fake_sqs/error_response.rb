@@ -12,7 +12,7 @@ module FakeSQS
     end
 
     def status
-      @status ||= statuses.fetch(error.class.name) { 500 }
+      @status ||= statuses.fetch(code)
     end
 
     def body
@@ -20,7 +20,7 @@ module FakeSQS
       xml.ErrorResponse do
         xml.Error do
           xml.Type type
-          xml.Code error.class.name
+          xml.Code code
           xml.Message error.to_s
           xml.Detail
         end
@@ -29,6 +29,15 @@ module FakeSQS
     end
 
     private
+
+    def code
+      code = error.class.name.sub(/^FakeSQS::/, '')
+      if statuses.has_key?(code)
+        code
+      else
+        "InternalError"
+      end
+    end
 
     def type
       if status < 500
@@ -39,7 +48,7 @@ module FakeSQS
     end
 
     def statuses
-      YAML.load_file(File.expand_path('../error_responses.yml', __FILE__))
+      @statuses ||= YAML.load_file(File.expand_path('../error_responses.yml', __FILE__))
     end
 
   end
