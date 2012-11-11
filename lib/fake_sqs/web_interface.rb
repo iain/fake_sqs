@@ -3,6 +3,10 @@ require 'sinatra/base'
 module FakeSQS
   class WebInterface < Sinatra::Base
 
+    configure do
+      use FakeSQS::CatchErrors, response: ErrorResponse
+    end
+
     helpers do
 
       def action

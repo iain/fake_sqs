@@ -1,10 +1,12 @@
-require 'fake_sqs/version'
-require 'fake_sqs/server'
-require 'fake_sqs/queues'
-require 'fake_sqs/responder'
+require 'fake_sqs/catch_errors'
+require 'fake_sqs/error_response'
+require 'fake_sqs/message'
 require 'fake_sqs/queue'
 require 'fake_sqs/queue_factory'
-require 'fake_sqs/message'
+require 'fake_sqs/queues'
+require 'fake_sqs/responder'
+require 'fake_sqs/server'
+require 'fake_sqs/version'
 
 module FakeSQS
 
