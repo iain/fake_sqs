@@ -10,11 +10,7 @@ module FakeSQS
     helpers do
 
       def action
-        underscore(params.fetch("Action"))
-      end
-
-      def underscore(string)
-        string.gsub(/([A-Z])/) { |m| "_#{m[0]}".downcase }.sub(/^_/, '')
+        params.fetch("Action")
       end
 
     end

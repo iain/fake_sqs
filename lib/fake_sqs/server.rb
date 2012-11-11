@@ -11,7 +11,7 @@ module FakeSQS
     end
 
     def call(action, *args)
-      public_send(action, *args)
+      public_send(underscore(action), *args)
     end
 
     # Actions for Queues
@@ -166,6 +166,10 @@ module FakeSQS
 
     def url_for(id)
       "http://#{host}:#{port}/#{id}"
+    end
+
+    def underscore(string)
+      string.gsub(/([A-Z])/) { |m| "_#{m[0]}".downcase }.sub(/^_/, '')
     end
 
   end
