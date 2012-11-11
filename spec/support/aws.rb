@@ -8,9 +8,6 @@ Thread.abort_on_exception = true
 
 ENV['RACK_ENV'] = 'test'
 
-require 'webmock/rspec'
-WebMock.disable_net_connect!(:allow_localhost => true)
-
 Thin::Logging.silent = true
 
 class FakeServer

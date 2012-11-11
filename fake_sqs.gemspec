@@ -23,7 +23,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rspec"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "aws-sdk"
-  gem.add_development_dependency "webmock"
   gem.add_development_dependency "faraday"
   gem.add_development_dependency "thin"
   gem.add_development_dependency "verbose_hash_fetch"
