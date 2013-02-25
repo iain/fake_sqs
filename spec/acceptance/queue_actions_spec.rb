@@ -6,21 +6,21 @@ describe "Actions for Queues", :acceptance do
 
   specify "CreateQueue" do
     queue = sqs.queues.create("test-create-queue")
-    queue.url.should eq "http://0.0.0.0:4567/test-create-queue"
+    queue.url.should eq "http://0.0.0.0:4568/test-create-queue"
   end
 
   specify "GetQueueUrl" do
     sqs.queues.create("test-get-queue-url")
     queue = sqs.queues.named("test-get-queue-url")
-    queue.url.should eq "http://0.0.0.0:4567/test-get-queue-url"
+    queue.url.should eq "http://0.0.0.0:4568/test-get-queue-url"
   end
 
   specify "ListQueues" do
     sqs.queues.create("test-list-1")
     sqs.queues.create("test-list-2")
     queues = sqs.queues.map(&:url).should eq [
-      "http://0.0.0.0:4567/test-list-1",
-      "http://0.0.0.0:4567/test-list-2"
+      "http://0.0.0.0:4568/test-list-1",
+      "http://0.0.0.0:4568/test-list-2"
     ]
   end
 
@@ -29,8 +29,8 @@ describe "Actions for Queues", :acceptance do
     sqs.queues.create("test-list-2")
     sqs.queues.create("other-list-3")
     queues = sqs.queues.with_prefix("test").map(&:url).should eq [
-      "http://0.0.0.0:4567/test-list-1",
-      "http://0.0.0.0:4567/test-list-2"
+      "http://0.0.0.0:4568/test-list-1",
+      "http://0.0.0.0:4568/test-list-2"
     ]
   end
 

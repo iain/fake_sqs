@@ -14,7 +14,7 @@ class FakeServer
 
   attr_reader :url
 
-  def initialize(url = "http://0.0.0.0:4567")
+  def initialize(url = "http://0.0.0.0:4568")
     @url = url
   end
 

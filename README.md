@@ -60,7 +60,7 @@ let it talk to Fake SQS.
 AWS.config(
   :use_ssl           => false,
   :sqs_endpoint      => "localhost",
-  :sqs_port          => 4567,
+  :sqs_port          => 4568,
   :access_key_id     => "access key id",
   :secret_access_key => "secret access key"
 )
@@ -73,7 +73,7 @@ To reset the entire server, during tests for example, send a DELETE request to
 the server. For example:
 
 ```
-$ curl -X DELETE http://localhost:4567/
+$ curl -X DELETE http://localhost:4568/
 ```
 
 Within SQS, after receiving, messages will be available again automatically
@@ -81,7 +81,7 @@ after a certain time. While this is not implemented (for now at least), you can
 trigger this behavior at at will, with a PUT request.
 
 ```
-$ curl -X PUT http://localhost:4567/
+$ curl -X PUT http://localhost:4568/
 ```
 
 

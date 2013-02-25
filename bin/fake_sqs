@@ -3,11 +3,11 @@
 require 'fake_sqs'
 require 'optparse'
 
-options = { :port => 4567, :host => "0.0.0.0", :verbose => false, :daemonize => false }
+options = { :port => 4568, :host => "0.0.0.0", :verbose => false, :daemonize => false }
 
 parser = OptionParser.new do |o|
 
-  o.on "-p", "--port PORT", Integer, "Port to use (default: 4567)" do |port|
+  o.on "-p", "--port PORT", Integer, "Port to use (default: #{options[:port]})" do |port|
     options[:port] = port
   end
 
