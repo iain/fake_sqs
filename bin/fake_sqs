@@ -3,7 +3,7 @@
 require 'fake_sqs'
 require 'optparse'
 
-options = { :port => 4567, :host => "0.0.0.0", :verbose => false }
+options = { :port => 4567, :host => "0.0.0.0", :verbose => false, :daemonize => false }
 
 parser = OptionParser.new do |o|
 
@@ -15,8 +15,16 @@ parser = OptionParser.new do |o|
     options[:host] = host
   end
 
-  o.on "-s", "--server SERVER", ['thin', 'mongrel', 'webrick'], "Server to use: thin, mongrel or webrick" do |server|
+  o.on "-s", "--server SERVER", ['thin', 'mongrel', 'webrick'], "Server to use: thin, mongrel or webrick (by default Sinatra chooses the best available)" do |server|
     options[:server] = server
+  end
+
+  o.on "-P", "--pid PIDFILE", "Where to write the pid" do |pid|
+    options[:pid] = pid
+  end
+
+  o.on "-d", "--[no-]daemonize", "Detaches the process" do |daemonize|
+    options[:daemonize] = daemonize
   end
 
   o.on "-v", "--[no]-verbose", "Shows input parameters and output XML" do |verbose|
@@ -42,6 +50,24 @@ app = FakeSQS::WebInterface
 if options[:verbose]
   require 'fake_sqs/show_output'
   app.use FakeSQS::ShowOutput
+end
+
+if options[:daemonize]
+  Process.daemon(true, true)
+end
+
+if (pid = options[:pid])
+  if File.exist?(pid)
+    existing_pid = File.open(pid, 'r').read.chomp.to_i
+    running = Process.getpgid(existing_pid) rescue false
+    if running
+      warn "Error, Process #{existing_pid} already running"
+      exit 1
+    else
+      warn "Cleaning up stale pid at #{pid}"
+    end
+  end
+  File.open(pid, 'w') { |f| f.write(Process.pid) }
 end
 
 app.set :port, options[:port]
