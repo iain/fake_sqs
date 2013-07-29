@@ -30,6 +30,11 @@ module FakeSQS
     end
 
     post "/" do
+      if params['QueueUrl']
+        queue = URI.parse(params['QueueUrl']).path.gsub(/\//, '')
+        return settings.api.call(action, queue, params) unless queue.empty?
+      end
+
       settings.api.call(action, params)
     end
 
