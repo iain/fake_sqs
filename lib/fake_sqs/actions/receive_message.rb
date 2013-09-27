@@ -16,7 +16,7 @@ module FakeSQS
             xml.Message do
               xml.MessageId message.id
               xml.ReceiptHandle receipt
-              xml.MD5OfMessageBody message.md5
+              xml.MD5OfBody message.md5
               xml.Body message.body
             end
           end
