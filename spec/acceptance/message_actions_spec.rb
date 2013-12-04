@@ -1,6 +1,6 @@
-require 'support/aws'
+require "spec_helper"
 
-describe "Actions for Messages", :acceptance do
+describe "Actions for Messages", :sqs do
 
   before do
     sqs.queues.create("test")
@@ -54,6 +54,10 @@ describe "Actions for Messages", :acceptance do
 
     messages = queue.receive_message(:limit => 10)
     messages.map(&:body).should match_array bodies
+  end
+
+  def let_messages_in_flight_expire
+    $fake_sqs.expire
   end
 
 end

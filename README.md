@@ -85,5 +85,65 @@ $ curl -X PUT http://localhost:4568/
 ```
 
 
+### Test Integration
+
+When making integration tests for your app, you can easily include Fake SQS.
+
+Here are the methods you need to run FakeSQS programmatically.
+
+``` ruby
+require "fake_sqs/test_integration"
+
+# globally, before the test suite starts:
+AWS.config(
+  use_ssl:            false,
+  sqs_endpoint:       "localhost",
+  sqs_port:           4568,
+  access_key_id:      "fake access key",
+  secret_access_key:  "fake secret key",
+)
+fake_sqs = FakeSQS::TestIntegration.new
+
+# before each test that requires SQS:
+fake_sqs.start
+
+# at the end of the suite:
+at_exit {
+  fake_sqs.stop
+}
+```
+
+By starting it like this it will start when needed, and reset between each test.
+
+Here's an example for RSpec to put in `spec/spec_helper.rb`:
+
+``` ruby
+AWS.config(
+  use_ssl:            false,
+  sqs_endpoint:       "localhost",
+  sqs_port:           4568,
+  access_key_id:      "fake access key",
+  secret_access_key:  "fake secret key",
+)
+
+RSpec.configure do |config|
+  config.treat_symbols_as_metadata_keys_with_true_values = true
+  config.before(:suite) { $fake_sqs = FakeSQS::TestIntegration.new }
+  config.before(:each, :sqs) { $fake_sqs.start }
+  config.after(:suite) { $fake_sqs.stop }
+end
+```
+
+Now you can use the `:sqs metadata to enable SQS integration:
+
+``` ruby
+describe "something with sqs", :sqs do
+  it "should work" do
+    queue = AWS::SQS.new.queues.create("my-queue")
+  end
+end
+```
+
+
   [fake_dynamo]: https://github.com/ananthakumaran/fake_dynamo
   [aws-sdk]: https://github.com/amazonwebservices/aws-sdk-for-ruby

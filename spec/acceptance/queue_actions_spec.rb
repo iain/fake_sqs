@@ -1,6 +1,6 @@
-require 'support/aws'
+require "spec_helper"
 
-describe "Actions for Queues", :acceptance do
+describe "Actions for Queues", :sqs do
 
   let(:sqs) { AWS::SQS.new }
 
@@ -18,7 +18,7 @@ describe "Actions for Queues", :acceptance do
   specify "ListQueues" do
     sqs.queues.create("test-list-1")
     sqs.queues.create("test-list-2")
-    queues = sqs.queues.map(&:url).should eq [
+    sqs.queues.map(&:url).should eq [
       "http://0.0.0.0:4568/test-list-1",
       "http://0.0.0.0:4568/test-list-2"
     ]
@@ -28,9 +28,9 @@ describe "Actions for Queues", :acceptance do
     sqs.queues.create("test-list-1")
     sqs.queues.create("test-list-2")
     sqs.queues.create("other-list-3")
-    queues = sqs.queues.with_prefix("test").map(&:url).should eq [
+    sqs.queues.with_prefix("test").map(&:url).should eq [
       "http://0.0.0.0:4568/test-list-1",
-      "http://0.0.0.0:4568/test-list-2"
+      "http://0.0.0.0:4568/test-list-2",
     ]
   end
 
