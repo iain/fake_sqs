@@ -1,0 +1,25 @@
+module FakeSQS
+  module Actions
+    class SetQueueAttributes
+
+      def initialize(options = {})
+        @server    = options.fetch(:server)
+        @queues    = options.fetch(:queues)
+        @responder = options.fetch(:responder)
+      end
+
+      def call(queue_name, params)
+        queue = @queues.get(queue_name)
+        results = {}
+        params.each do |key, value|
+          if key =~ /\AAttribute\.(\d+)\.Name\z/
+            results[value] = params.fetch("Attribute.#{$1}.Value")
+          end
+        end
+        queue.attributes.merge!(results)
+        @responder.call :SetQueueAttributes
+      end
+
+    end
+  end
+end

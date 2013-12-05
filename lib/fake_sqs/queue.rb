@@ -6,11 +6,13 @@ module FakeSQS
 
   class Queue
 
-    attr_reader :name, :messages, :message_factory, :messages_in_flight
+    attr_reader :name, :messages, :message_factory, :messages_in_flight, :attributes
 
     def initialize(options = {})
       @name = options.fetch("QueueName")
       @message_factory = options.fetch(:message_factory)
+      @attributes = {}
+      @attributes["QueueArn"] = "arn:aws:sqs:us-east-1:#{SecureRandom.hex}:#{@name}"
       reset
     end
 
@@ -42,7 +44,7 @@ module FakeSQS
     end
 
     def delete_message(receipt)
-      message = messages_in_flight.delete(receipt)
+      messages_in_flight.delete(receipt)
     end
 
     def reset
