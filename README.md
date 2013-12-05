@@ -6,7 +6,7 @@ testing, just like you would have a local database running. Fake SQS doesn't
 persist anything, not even the queues themselves. You'll have to create the
 queues everytime you start it.
 
-This implementation is **not complete** yet.
+This implementation is **not complete** yet, but should be useful already.
 
 Done so far are:
 
@@ -17,6 +17,7 @@ Done so far are:
 * Send messages (and in batch)
 * Receive messages (and in batch)
 * Deleting messages (and in batch)
+* Changing queue attributes (but not all, and no validation)
 
 Certain bits are left off on purpose, to make it easier to work with, such as:
 
@@ -27,11 +28,12 @@ Certain bits are left off on purpose, to make it easier to work with, such as:
 Other parts are just not done yet:
 
 * Permissions
-* Changing queue attributes
 * Changing message visibility
 * Error handling
 
 So, actually, just the basics are implemented at this point.
+
+PS. There is also [Fake SNS] [fake_sns].
 
 ## Usage
 
@@ -147,3 +149,4 @@ end
 
   [fake_dynamo]: https://github.com/ananthakumaran/fake_dynamo
   [aws-sdk]: https://github.com/amazonwebservices/aws-sdk-for-ruby
+  [fake_sns]: https://github.com/yourkarma/fake_sns
