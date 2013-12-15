@@ -16,7 +16,7 @@ module FakeSQS
             results[value] = params.fetch("Attribute.#{$1}.Value")
           end
         end
-        queue.attributes.merge!(results)
+        queue.add_queue_attributes(results)
         @responder.call :SetQueueAttributes
       end
 

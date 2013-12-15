@@ -6,14 +6,26 @@ module FakeSQS
 
   class Queue
 
-    attr_reader :name, :messages, :message_factory, :messages_in_flight, :attributes
+    attr_reader :name, :messages, :message_factory, :messages_in_flight, :arn
 
     def initialize(options = {})
       @name = options.fetch("QueueName")
       @message_factory = options.fetch(:message_factory)
-      @attributes = {}
-      @attributes["QueueArn"] = "arn:aws:sqs:us-east-1:#{SecureRandom.hex}:#{@name}"
+      @arn = "arn:aws:sqs:us-east-1:#{SecureRandom.hex}:#{@name}"
+      @queue_attributes = {}
       reset
+    end
+
+    def add_queue_attributes(attrs)
+      @queue_attributes.merge!(attrs)
+    end
+
+    def attributes
+      @queue_attributes.merge(
+        "QueueArn" => arn,
+        "ApproximateNumberOfMessages" => messages.size,
+        "ApproximateNumberOfMessagesNotVisible" => messages_in_flight.size,
+      )
     end
 
     def send_message(options = {})

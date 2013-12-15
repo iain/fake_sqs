@@ -54,7 +54,7 @@ describe FakeSQS::Queue do
 
       sample_group.times do
         sent_first     = send_message
-        sent_second    = send_message
+        _    = send_message
         message = receive_message.values.first
         if message == sent_first
           indexes[:first] += 1
@@ -88,10 +88,18 @@ describe FakeSQS::Queue do
     end
 
     it "keeps track of sent messages" do
+
       send_message
+
       queue.should have(0).messages_in_flight
+      queue.attributes["ApproximateNumberOfMessagesNotVisible"].should eq 0
+      queue.attributes["ApproximateNumberOfMessages"].should eq 1
+
       receive_message
+
       queue.should have(1).messages_in_flight
+      queue.attributes["ApproximateNumberOfMessagesNotVisible"].should eq 1
+      queue.attributes["ApproximateNumberOfMessages"].should eq 0
     end
 
     it "gets multiple message" do
@@ -117,7 +125,7 @@ describe FakeSQS::Queue do
   describe "#delete_message" do
 
     it "deletes by the receipt" do
-      message = send_message
+      send_message
       receipt = receive_message.keys.first
 
       queue.should have(1).messages_in_flight
@@ -128,6 +136,20 @@ describe FakeSQS::Queue do
 
     it "won't raise if the receipt is unknown" do
       queue.delete_message("abc")
+    end
+
+  end
+
+  describe "#add_queue_attributes" do
+
+    it "adds to it's queue attributes" do
+      queue.add_queue_attributes("foo" => "bar")
+      queue.attributes.should eq(
+        "foo"                                   => "bar",
+        "QueueArn"                              => queue.arn,
+        "ApproximateNumberOfMessages"           => 0,
+        "ApproximateNumberOfMessagesNotVisible" => 0
+      )
     end
 
   end
