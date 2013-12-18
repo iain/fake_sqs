@@ -1,16 +1,18 @@
 require 'fake_sqs/queues'
+require 'fake_sqs/memory_database'
 
 describe FakeSQS::Queues do
 
+  let(:fake_database) { FakeSQS::MemoryDatabase.new }
   let(:queue_factory) { double :queue_factory, :new => double }
-  subject(:queues) { FakeSQS::Queues.new(queue_factory: queue_factory) }
+  subject(:queues) { FakeSQS::Queues.new(queue_factory: queue_factory, database: fake_database) }
 
   describe "#create" do
 
     it "creates new queues" do
-      queues.should have(0).queues
+      queues.list.size.should eq 0
       create_queue("test")
-      queues.should have(1).queues
+      queues.list.size.should eq 1
     end
 
     it "uses the queue factory" do
@@ -38,9 +40,9 @@ describe FakeSQS::Queues do
 
     it "deletes an existing queue" do
       create_queue("test")
-      queues.should have(1).queues
+      queues.list.size.should eq 1
       queues.delete("test")
-      queues.should have(0).queues
+      queues.list.size.should eq 0
     end
 
     it "cannot delete an non-existing queue" do
@@ -62,7 +64,7 @@ describe FakeSQS::Queues do
     it "can be filtered by prefix" do
       queue1 = create_queue("test-1")
       queue2 = create_queue("test-2")
-      queue3 = create_queue("other-3")
+      _ = create_queue("other-3")
       queues.list("QueueNamePrefix" => "test").should eq [ queue1, queue2 ]
     end
 
@@ -88,9 +90,9 @@ describe FakeSQS::Queues do
     it "clears all queues" do
       create_queue("foo")
       create_queue("bar")
-      queues.should have(2).queues
+      queues.list.size.should eq 2
       queues.reset
-      queues.should have(0).queues
+      queues.list.size.should eq 0
     end
 
   end

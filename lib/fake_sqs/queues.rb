@@ -5,25 +5,26 @@ module FakeSQS
 
   class Queues
 
-    attr_reader :queues, :queue_factory
+    attr_reader :queue_factory, :database
 
     def initialize(options = {})
       @queue_factory = options.fetch(:queue_factory)
-      reset
+      @database = options.fetch(:database)
+      @database.load
     end
 
     def create(name, options = {})
-      if queues[name]
+      if database[name]
         fail QueueNameExists, name
       else
         queue = queue_factory.new(options)
-        queues[name] = queue
+        database[name] = queue
       end
     end
 
     def delete(name, options = {})
-      if queues[name]
-        queues.delete(name)
+      if database[name]
+        database.delete(name)
       else
         fail NonExistentQueue, name
       end
@@ -31,26 +32,38 @@ module FakeSQS
 
     def list(options = {})
       if (prefix = options["QueueNamePrefix"])
-        queues.select { |name, queue| name =~ /^#{prefix}/ }.values
+        database.select { |name, queue| name.start_with?(prefix) }.values
       else
-        queues.values
+        database.values
       end
     end
 
     def get(name, options = {})
-      if queues[name]
-        queues[name]
+      if (db = database[name])
+        db
       else
         fail NonExistentQueue, name
       end
     end
 
+    def transaction
+      database.transaction do
+        yield
+      end
+    end
+
+    def save(queue)
+      database[queue.name] = queue
+    end
+
     def reset
-      @queues = {}
+      database.reset
     end
 
     def expire
-      queues.each { |name, queue| queue.expire }
+      transaction do
+        database.each { |name, queue| queue.expire }
+      end
     end
 
   end

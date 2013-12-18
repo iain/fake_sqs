@@ -16,7 +16,7 @@ module FakeSQS
 
   class API
 
-    attr_reader :queues
+    attr_reader :queues, :options
 
     def initialize(options = {})
       @queues    = options.fetch(:queues)
@@ -25,7 +25,10 @@ module FakeSQS
 
     def call(action, *args)
       if FakeSQS::Actions.const_defined?(action)
-        FakeSQS::Actions.const_get(action).new(@options).call(*args)
+        action = FakeSQS::Actions.const_get(action).new(options)
+        queues.transaction do
+          action.call(*args)
+        end
       else
         fail InvalidAction, "Unknown (or not yet implemented) action: #{action}"
       end

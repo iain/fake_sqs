@@ -9,13 +9,15 @@ AWS.config(
   :secret_access_key => "fake secret key",
 )
 
-$fake_sqs = FakeSQS::TestIntegration.new
+db = ENV["SQS_DATABASE"] || ":memory:"
+puts "\n\e[34mRunning specs with database \e[33m#{db}\e[0m"
+$fake_sqs = FakeSQS::TestIntegration.new(database: db)
 
 RSpec.configure do |config|
 
   config.treat_symbols_as_metadata_keys_with_true_values = true
-  config.before(:suite) { $fake_sqs = FakeSQS::TestIntegration.new }
   config.before(:each, :sqs) { $fake_sqs.start }
+  config.before(:each, :sqs) { $fake_sqs.reset }
   config.after(:suite) { $fake_sqs.stop }
 
 end

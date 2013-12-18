@@ -6,9 +6,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'fake_sqs'
 require 'optparse'
 
-options = { :port => 4568, :host => "0.0.0.0", :verbose => false, :daemonize => false }
+options = { :port => 4568, :host => "0.0.0.0", :verbose => false, :daemonize => false, :database => ":memory:" }
 
 parser = OptionParser.new do |o|
+
+  o.on "--database DATABASE", "Where to store the database (default: #{options[:database]})" do |database|
+    options[:database] = database
+  end
 
   o.on "-p", "--port PORT", Integer, "Port to use (default: #{options[:port]})" do |port|
     options[:port] = port
@@ -77,5 +81,5 @@ app.set :port, options[:port]
 app.set :bind, options[:host]
 app.set :server, options[:server] if options[:server]
 server = FakeSQS.server(port: options[:port], host: options[:host])
-app.set :api, FakeSQS.api(server: server)
+app.set :api, FakeSQS.api(server: server, database: options[:database])
 app.run!

@@ -23,7 +23,8 @@ module FakeSQS
     end
 
     def start!
-      @pid = Process.spawn(binfile, "-p", port.to_s, :out => out, :err => out)
+      args = [ binfile, "-p", port.to_s, "--database", database, { :out => out, :err => out } ]
+      @pid = Process.spawn(*args)
       wait_until_up
     end
 
@@ -61,6 +62,9 @@ module FakeSQS
       options.fetch(key) { AWS.config.public_send(key) }
     end
 
+    def database
+      options.fetch(:database)
+    end
 
     def wait_until_up(deadline = Time.now + 2)
       fail "FakeSQS didn't start in time" if Time.now > deadline

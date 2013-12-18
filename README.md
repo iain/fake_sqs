@@ -55,6 +55,15 @@ To configure, see the options in the help:
 $ fake_sqs --help
 ```
 
+By default, FakeSQS uses an in-memory database (just a hash actually). To make
+it persistant, run with:
+
+```
+$ fake_sqs --database /path/to/database.yml
+```
+
+Messages are not persisted, just the queues.
+
 This is an example of how to configure the official [aws-sdk gem] [aws-sdk], to
 let it talk to Fake SQS.
 
@@ -144,6 +153,24 @@ describe "something with sqs", :sqs do
     queue = AWS::SQS.new.queues.create("my-queue")
   end
 end
+```
+
+## Development
+
+Run all the specs:
+
+```
+$ rake
+```
+
+This will run the unit tests, then the acceptance tests for both types of
+storage (in-memory and on disk).
+
+When debugging an acceptance test, you can run it like this, which will redirect
+output to the console:
+
+```
+$ DEBUG=true SQS_DATABASE=tmp/sqs.yml rspec spec/acceptance
 ```
 
 

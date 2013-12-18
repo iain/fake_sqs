@@ -15,11 +15,13 @@ end
 describe FakeSQS::API do
 
   it "delegates actions to classes" do
-    api = FakeSQS::API.new(:queues => [])
+    queues = double :queues
+    allow(queues).to receive(:transaction).and_yield
+    api = FakeSQS::API.new(:queues => queues)
 
     response = api.call("TheAction", {:foo => "bar"})
 
-    response[:options].should eq :queues => []
+    response[:options].should eq :queues => queues
     response[:params].should eq :foo => "bar"
   end
 

@@ -17,6 +17,7 @@ module FakeSQS
           end
         end
         queue.add_queue_attributes(results)
+        @queues.save(queue)
         @responder.call :SetQueueAttributes
       end
 
