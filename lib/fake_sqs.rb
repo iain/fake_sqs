@@ -10,9 +10,38 @@ require 'fake_sqs/server'
 require 'fake_sqs/version'
 require 'fake_sqs/memory_database'
 require 'fake_sqs/file_database'
-require 'fake_sqs/web_interface'
 
 module FakeSQS
+
+  def self.to_rack(options)
+
+    require 'fake_sqs/web_interface'
+    app = FakeSQS::WebInterface
+
+    if (log = options[:log])
+      $stdout.reopen(log, "w:utf-8")
+      $stderr.reopen(log, "w:utf-8")
+      app.enable :logging
+    end
+
+    if options[:verbose]
+      require 'fake_sqs/show_output'
+      app.use FakeSQS::ShowOutput
+      app.enable :logging
+    end
+
+    if options[:daemonize]
+      require 'fake_sqs/daemonize'
+      Daemonize.new(options).call
+    end
+
+    app.set :port, options[:port] if options[:port]
+    app.set :bind, options[:host] if options[:host]
+    app.set :server, options[:server] if options[:server]
+    server = FakeSQS.server(port: options[:port], host: options[:host])
+    app.set :api, FakeSQS.api(server: server, database: options[:database])
+    app
+  end
 
   def self.server(options = {})
     Server.new(options)

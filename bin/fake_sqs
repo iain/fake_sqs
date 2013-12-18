@@ -6,7 +6,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'fake_sqs'
 require 'optparse'
 
-options = { :port => 4568, :host => "0.0.0.0", :verbose => false, :daemonize => false, :database => ":memory:" }
+options = {
+  :port => 4568,
+  :host => "0.0.0.0",
+  :verbose => false,
+  :daemonize => false,
+  :database => ":memory:"
+}
 
 parser = OptionParser.new do |o|
 
@@ -18,7 +24,7 @@ parser = OptionParser.new do |o|
     options[:port] = port
   end
 
-  o.on "-o", "--bind HOST", "Host to bind to (default: 0.0.0.0)" do |host|
+  o.on "-o", "--bind HOST", "Host to bind to (default: #{options[:host]})" do |host|
     options[:host] = host
   end
 
@@ -34,8 +40,12 @@ parser = OptionParser.new do |o|
     options[:daemonize] = daemonize
   end
 
-  o.on "-v", "--[no]-verbose", "Shows input parameters and output XML" do |verbose|
+  o.on "-v", "--[no-]verbose", "Shows input parameters and output XML" do |verbose|
     options[:verbose] = verbose
+  end
+
+  o.on "--log FILE", "Redirect output to this logfile (default: console)" do |logfile|
+    options[:log] = logfile
   end
 
   o.on_tail "--version", "Shows the version" do
@@ -52,34 +62,4 @@ end
 
 parser.parse!
 
-app = FakeSQS::WebInterface
-
-if options[:verbose]
-  require 'fake_sqs/show_output'
-  app.use FakeSQS::ShowOutput
-end
-
-if options[:daemonize]
-  Process.daemon(true, true)
-end
-
-if (pid = options[:pid])
-  if File.exist?(pid)
-    existing_pid = File.open(pid, 'r').read.chomp.to_i
-    running = Process.getpgid(existing_pid) rescue false
-    if running
-      warn "Error, Process #{existing_pid} already running"
-      exit 1
-    else
-      warn "Cleaning up stale pid at #{pid}"
-    end
-  end
-  File.open(pid, 'w') { |f| f.write(Process.pid) }
-end
-
-app.set :port, options[:port]
-app.set :bind, options[:host]
-app.set :server, options[:server] if options[:server]
-server = FakeSQS.server(port: options[:port], host: options[:host])
-app.set :api, FakeSQS.api(server: server, database: options[:database])
-app.run!
+FakeSQS.to_rack(options).run!

@@ -23,7 +23,7 @@ module FakeSQS
     end
 
     def start!
-      args = [ binfile, "-p", port.to_s, "--database", database, { :out => out, :err => out } ]
+      args = [ binfile, "-p", port.to_s, verbose, logging, "--database", database, { :out => out, :err => out } ].flatten.compact
       @pid = Process.spawn(*args)
       wait_until_up
     end
@@ -66,6 +66,22 @@ module FakeSQS
       options.fetch(:database)
     end
 
+    def verbose
+      if debug?
+        "--verbose"
+      else
+        "--no-verbose"
+      end
+    end
+
+    def logging
+      if (file = ENV["SQS_LOG"] || options[:log])
+        [ "--log", file ]
+      else
+        []
+      end
+    end
+
     def wait_until_up(deadline = Time.now + 2)
       fail "FakeSQS didn't start in time" if Time.now > deadline
       unless up?
@@ -91,7 +107,7 @@ module FakeSQS
     end
 
     def debug?
-      ENV["DEBUG"].to_s == "true"
+      ENV["DEBUG"].to_s == "true" || options[:debug]
     end
 
   end
