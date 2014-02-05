@@ -1,3 +1,4 @@
+require 'fake_sqs/actions/change_message_visibility'
 require 'fake_sqs/actions/create_queue'
 require 'fake_sqs/actions/delete_queue'
 require 'fake_sqs/actions/list_queues'
@@ -21,6 +22,13 @@ module FakeSQS
     def initialize(options = {})
       @queues    = options.fetch(:queues)
       @options   = options
+      @run_timer = true
+      @timer     = Thread.new do
+        while @run_timer
+          queues.timeout_messages!
+          sleep(5)
+        end
+      end
     end
 
     def call(action, *args)
@@ -42,6 +50,10 @@ module FakeSQS
 
     def expire
       queues.expire
+    end
+
+    def stop
+      @run_timer = false
     end
 
   end

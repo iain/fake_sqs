@@ -16,6 +16,7 @@ InvalidSecurity: 403
 InvalidSecurityToken: 400
 MalformedVersion: 400
 MessageTooLong: 400
+MessageNotInflight: 400
 MissingClientTokenId: 403
 MissingCredentials: 401
 MissingParameter: 400
@@ -25,6 +26,7 @@ NotAuthorizedToUseVersion: 401
 QueueDeletedRecently: 400
 QueueNameExists: 400
 ReadCountOutOfRange: 400
+ReceiptHandleIsInvalid: 400
 RequestExpired: 400
 RequestThrottled: 403
 ServiceUnavailable: 503
