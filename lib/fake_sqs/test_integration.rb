@@ -23,7 +23,7 @@ module FakeSQS
     end
 
     def start!
-      args = [ binfile, "-p", port.to_s, verbose, logging, "--database", database, { :out => out, :err => out } ].flatten.compact
+      args = [ binfile, "-p", port.to_s, verbose, database, logging, { :out => out, :err => out } ].flatten.compact
       @pid = Process.spawn(*args)
       wait_until_up
     end
@@ -36,6 +36,15 @@ module FakeSQS
       else
         $stderr.puts "FakeSQS is not running"
       end
+    end
+
+    def database
+      if options.has_key? :database
+        ["--database", options.fetch(:database)]
+      else
+        []
+      end
+
     end
 
     def reset
@@ -60,10 +69,6 @@ module FakeSQS
 
     def option(key)
       options.fetch(key) { AWS.config.public_send(key) }
-    end
-
-    def database
-      options.fetch(:database)
     end
 
     def verbose
