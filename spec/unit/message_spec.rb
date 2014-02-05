@@ -29,6 +29,37 @@ describe FakeSQS::Message do
 
   end
 
+  describe 'visibility_timeout' do
+
+    let :message do
+      create_message
+    end
+
+    it 'should default to nil' do
+      message.visibility_timeout.should be_nil
+    end
+
+    it 'should be expired when it is nil' do
+      message.should be_expired
+    end
+
+    it 'should be expired if set to a previous time' do
+      message.visibility_timeout = Time.now - 1
+      message.should be_expired
+    end
+
+    it 'should not be expired at a future date' do
+      message.visibility_timeout = Time.now + 1
+      message.should_not be_expired
+    end
+
+    it 'should not be expired when set to expire at a future date' do
+      message.expire_at(5)
+      message.visibility_timeout.should be >=(Time.now + 4)
+    end
+
+  end
+
   def create_message(options = {})
     FakeSQS::Message.new({"MessageBody" => "test"}.merge(options))
   end

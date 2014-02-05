@@ -18,17 +18,16 @@ Done so far are:
 * Receive messages (and in batch)
 * Deleting messages (and in batch)
 * Changing queue attributes (but not all, and no validation)
+* Setting visibility timeouts for messages
 
 Certain bits are left off on purpose, to make it easier to work with, such as:
 
 * No checking on access keys or signatures
 * No 60 second delay between deleting a queue and recreating it.
-* No visibility timeouts (see below about special hooks)
 
 Other parts are just not done yet:
 
 * Permissions
-* Changing message visibility
 * Error handling
 
 So, actually, just the basics are implemented at this point.

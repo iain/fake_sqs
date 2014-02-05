@@ -1,5 +1,6 @@
 require 'fake_sqs/api'
 require 'fake_sqs/catch_errors'
+require 'fake_sqs/collection_view'
 require 'fake_sqs/error_response'
 require 'fake_sqs/message'
 require 'fake_sqs/queue'

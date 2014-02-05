@@ -60,6 +60,12 @@ module FakeSQS
       database.reset
     end
 
+    def timeout_messages!
+      transaction do
+        database.each { |name,queue| queue.timeout_messages! }
+      end
+    end
+
     def expire
       transaction do
         database.each { |name, queue| queue.expire }

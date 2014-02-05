@@ -56,6 +56,46 @@ describe "Actions for Messages", :sqs do
     messages.map(&:body).should match_array bodies
   end
 
+  specify "set message timeout to 0" do
+    body = 'some-sample-message'
+    queue.send_message(body)
+    message = queue.receive_message
+    message.body.should == body
+    message.visibility_timeout = 0
+
+    same_message = queue.receive_message
+    same_message.body.should == body
+  end
+
+  specify 'set message timeout and wait for message to come' do
+
+    body = 'some-sample-message'
+    queue.send_message(body)
+    message = queue.receive_message
+    message.body.should == body
+    message.visibility_timeout = 3
+
+    nothing = queue.receive_message
+    nothing.should be_nil
+
+    sleep(10)
+
+    same_message = queue.receive_message
+    same_message.body.should == body
+  end
+
+  specify 'should fail if trying to update the visibility_timeout for a message that is not in flight' do
+    body = 'some-sample-message'
+    queue.send_message(body)
+    message = queue.receive_message
+    message.body.should == body
+    message.visibility_timeout = 0
+
+    expect do
+      message.visibility_timeout = 30
+    end.to raise_error(AWS::SQS::Errors::MessageNotInflight)
+  end
+
   def let_messages_in_flight_expire
     $fake_sqs.expire
   end

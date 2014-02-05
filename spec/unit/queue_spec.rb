@@ -1,15 +1,11 @@
 require 'fake_sqs/queue'
+require 'fake_sqs/message'
 
 describe FakeSQS::Queue do
 
   class MessageFactory
-
-    def initialize
-      @count = 0
-    end
-
     def new(options = {})
-      @count += 1
+      FakeSQS::Message.new({'MessageBody' => 'sample-body'}.merge(options))
     end
   end
 
