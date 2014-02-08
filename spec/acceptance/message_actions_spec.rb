@@ -68,7 +68,6 @@ describe "Actions for Messages", :sqs do
   end
 
   specify 'set message timeout and wait for message to come' do
-
     body = 'some-sample-message'
     queue.send_message(body)
     message = queue.receive_message
@@ -94,6 +93,20 @@ describe "Actions for Messages", :sqs do
     expect do
       message.visibility_timeout = 30
     end.to raise_error(AWS::SQS::Errors::MessageNotInflight)
+  end
+
+  specify 'ChangeMessageVisibilityBatch' do
+    bodies = (1..10).map { |n| n.to_s }
+    queue.batch_send(*bodies)
+    messages = queue.receive_messages(:limit => 10)
+
+    queue.visible_messages.should == 0
+    queue.approximate_number_of_messages_not_visible.should == 10
+
+    queue.batch_change_visibility(0, messages)
+
+    queue.visible_messages.should == 10
+    queue.approximate_number_of_messages_not_visible.should == 0
   end
 
   def let_messages_in_flight_expire

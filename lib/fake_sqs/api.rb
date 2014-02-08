@@ -1,4 +1,5 @@
 require 'fake_sqs/actions/change_message_visibility'
+require 'fake_sqs/actions/change_message_visibility_batch'
 require 'fake_sqs/actions/create_queue'
 require 'fake_sqs/actions/delete_queue'
 require 'fake_sqs/actions/list_queues'
