@@ -16,7 +16,7 @@ module FakeSQS
     end
 
     def body
-      xml = Builder::XmlMarkup.new(:index => 4)
+      xml = Builder::XmlMarkup.new()
       xml.ErrorResponse do
         xml.Error do
           xml.Type type
