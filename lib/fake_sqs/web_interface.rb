@@ -1,4 +1,6 @@
 require 'sinatra/base'
+require 'fake_sqs/catch_errors'
+require 'fake_sqs/error_response'
 
 module FakeSQS
   class WebInterface < Sinatra::Base
@@ -16,6 +18,10 @@ module FakeSQS
     end
 
     get "/" do
+      200
+    end
+
+    get "/ping" do
       200
     end
 

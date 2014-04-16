@@ -51,7 +51,7 @@ module FakeSQS
     end
 
     def up?
-      @pid && connection.get("/").code.to_s == "200"
+      @pid && connection.get("/ping").code.to_s == "200"
     rescue Errno::ECONNREFUSED
       false
     end
