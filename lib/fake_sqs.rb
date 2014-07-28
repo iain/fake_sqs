@@ -20,8 +20,10 @@ module FakeSQS
     app = FakeSQS::WebInterface
 
     if (log = options[:log])
-      $stdout.reopen(log, "w:utf-8")
-      $stderr.reopen(log, "w:utf-8")
+      file = File.new(log, "a+")
+      file.sync = true
+      app.use Rack::CommonLogger, file
+      app.set :log_file, file
       app.enable :logging
     end
 
