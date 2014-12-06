@@ -2,8 +2,8 @@ module FakeSQS
   module Actions
     class DeleteMessageBatch
 
-      def initialize(options = {})
-        @server    = options.fetch(:server)
+      def initialize(request, options = {})
+        @request   = request
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
       end
@@ -28,7 +28,6 @@ module FakeSQS
           end
         end
       end
-
     end
   end
 end
