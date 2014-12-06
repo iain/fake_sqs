@@ -1,3 +1,4 @@
+require 'fake_sqs/helpers'
 module FakeSQS
   module Actions
     class ListQueues
@@ -12,7 +13,7 @@ module FakeSQS
         found = @queues.list(params)
         @responder.call :ListQueues do |xml|
           found.each do |queue|
-            xml.QueueUrl queue_url(@request, queue.name)
+            xml.QueueUrl FakeSQS::Helpers.queue_url(@request, queue.name)
           end
         end
       end
