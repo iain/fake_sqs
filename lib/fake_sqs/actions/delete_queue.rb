@@ -8,7 +8,8 @@ module FakeSQS
         @responder = options.fetch(:responder)
       end
 
-      def call(name, params)
+      def call(params)
+        name = params['queue']
         @queues.delete(name, params)
         @responder.call :DeleteQueue
       end

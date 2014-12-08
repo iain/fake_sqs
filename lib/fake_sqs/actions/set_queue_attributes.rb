@@ -8,7 +8,8 @@ module FakeSQS
         @responder = options.fetch(:responder)
       end
 
-      def call(queue_name, params)
+      def call(params)
+        name = params['name']
         queue = @queues.get(queue_name)
         results = {}
         params.each do |key, value|

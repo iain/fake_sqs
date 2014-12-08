@@ -8,7 +8,8 @@ module FakeSQS
         @responder = options.fetch(:responder)
       end
 
-      def call(queue, params)
+      def call(params)
+        queue = params['queue']
         visibility = params.fetch("VisibilityTimeout")
         receipt = params.fetch("ReceiptHandle")
 

@@ -8,7 +8,8 @@ module FakeSQS
         @responder = options.fetch(:responder)
       end
 
-      def call(name, params)
+      def call(params)
+        name = params['queue']
         queue = @queues.get(name)
         message = queue.send_message(params)
         @responder.call :SendMessage do |xml|
