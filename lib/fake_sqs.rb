@@ -11,6 +11,7 @@ require 'fake_sqs/server'
 require 'fake_sqs/version'
 require 'fake_sqs/memory_database'
 require 'fake_sqs/file_database'
+require 'fake_sqs/extended_hash'
 
 module FakeSQS
 

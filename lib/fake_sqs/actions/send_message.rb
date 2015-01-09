@@ -10,7 +10,7 @@ module FakeSQS
 
       def call(name, params)
         queue = @queues.get(name)
-        message = queue.send_message(params)
+        message = queue.send_message(params.dotted_to_nested_hash)
         @responder.call :SendMessage do |xml|
           xml.MD5OfMessageBody message.md5
           xml.MessageId message.id
