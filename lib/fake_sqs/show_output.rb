@@ -1,4 +1,6 @@
+require 'rack'
 require 'rack/request'
+require 'yaml'
 
 module FakeSQS
   class ShowOutput
