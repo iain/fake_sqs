@@ -43,6 +43,7 @@ module FakeSQS
           attributes[index][attr_name] = value
         end
       }
+      attributes
     end
 
   end
