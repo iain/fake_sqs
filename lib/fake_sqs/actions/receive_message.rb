@@ -18,6 +18,16 @@ module FakeSQS
               xml.ReceiptHandle receipt
               xml.MD5OfBody message.md5
               xml.Body message.body
+              message.message_attributes.each do |attribute|
+                xml.MessageAttribute do
+                  xml.Name attribute["Name"]
+                  xml.Value do
+                    xml.StringValue attribute["Value.StringValue"] if attribute["Value.StringValue"]
+                    xml.BinaryValue attribute["Value.BinaryValue"] if attribute["Value.BinaryValue"]
+                    xml.DataType attribute["Value.DataType"]
+                  end
+                end
+              end
             end
           end
         end
