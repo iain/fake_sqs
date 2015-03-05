@@ -1,4 +1,5 @@
 require 'fake_sqs/message'
+require 'rspec/collection_matchers'
 
 describe FakeSQS::Message do
 
@@ -17,6 +18,52 @@ describe FakeSQS::Message do
       message = create_message("MessageBody" => "abc")
       message.md5.should eq "900150983cd24fb0d6963f7d28e17f72"
     end
+
+  end
+
+  describe "#message_attributes" do
+
+    it "has message attributes" do
+        message = create_message("MessageBody" => "abc",
+                                 "MessageAttribute.1.Name" => "one",
+                                 "MessageAttribute.1.StringValue" => "A String Value",
+                                 "MessageAttribute.1.DataType" => "String",
+                                 "MessageAttribute.2.Name" => "two",
+                                 "MessageAttribute.2.StringValue" => "35",
+                                 "MessageAttribute.2.DataType" => "Number",
+                                 "MessageAttribute.3.Name" => "three",
+                                 "MessageAttribute.3.BinaryValue" => "c29tZSBiaW5hcnkgZGF0YQ==",
+                                 "MessageAttribute.3.DataType" => "Binary")
+
+        message.message_attributes.should have(3).items
+        message.message_attributes_md5.should eq "6d31a67b8fa3c1a74d030c5de73fd7e2"
+    end
+
+    it "calculates string attribute md5" do
+
+        message = create_message("MessageBody" => "abc",
+                              "MessageAttribute.1.Name" => "one",
+                              "MessageAttribute.1.StringValue" => "A String Value",
+                              "MessageAttribute.1.DataType" => "String")
+        message.message_attributes_md5.should eq "88bb810f131daa54b83485598cc35693"
+    end
+
+    it "calculates number attribute md5" do
+        message = create_message("MessageBody" => "abc",
+                              "MessageAttribute.1.Name" => "two",
+                              "MessageAttribute.1.StringValue" => "35",
+                              "MessageAttribute.1.DataType" => "Number")
+        message.message_attributes_md5.should eq "7eb7af82e3ed82aef934e78b9ed11f12"
+    end
+
+    it "calculates binary attribute md5" do
+        message = create_message("MessageBody" => "abc",
+                              "MessageAttribute.1.Name" => "three",
+                              "MessageAttribute.1.BinaryValue" => "c29tZSBiaW5hcnkgZGF0YQ==",
+                              "MessageAttribute.1.DataType" => "Binary")
+        message.message_attributes_md5.should eq "c0f297612d491707df87d6444ecb4817"
+    end
+
 
   end
 

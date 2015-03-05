@@ -33,6 +33,46 @@ module FakeSQS
       }
     end
 
+    def message_attributes_md5
+        sorted_attributes = @message_attributes.sort { |a,b| a["Name"] <=> b["Name"] }
+
+        buffer = []
+
+        sorted_attributes.each do |attribute|
+
+            add_string_to_buffer(buffer, attribute["Name"])
+            add_string_to_buffer(buffer, attribute["DataType"])
+
+            if (attribute["StringValue"])
+                buffer << 1
+                add_string_to_buffer(buffer, attribute["StringValue"])
+            else
+                buffer << 2
+                add_binary_to_buffer(buffer, attribute["BinaryValue"])
+            end
+        end
+
+        Digest::MD5.hexdigest(buffer.pack("C*"))
+    end
+
+    def add_string_to_buffer(buffer, string)
+        string_bytes = string.force_encoding('UTF-8').bytes
+
+        buffer.concat [string_bytes.length].pack("N").bytes
+        buffer.concat string_bytes
+
+        buffer
+    end
+
+    def add_binary_to_buffer(buffer, binary)
+        bytes = binary.unpack("m*")[0].bytes
+
+        buffer.concat [bytes.length].pack("N").bytes
+        buffer.concat bytes
+
+        buffer
+    end
+
     private
     def extract_attributes(options)
       attributes = []
