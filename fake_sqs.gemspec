@@ -19,6 +19,7 @@ Gem::Specification.new do |gem|
   gem.license       = "MIT"
 
   gem.add_dependency "sinatra"
+  gem.add_dependency "sinatra-cross_origin"
   gem.add_dependency "builder"
 
   gem.add_development_dependency "rspec"
