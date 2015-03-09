@@ -28,5 +28,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "thin"
   gem.add_development_dependency "verbose_hash_fetch"
   gem.add_development_dependency "activesupport"
+  gem.add_development_dependency "rspec-collection_matchers"
 
 end
