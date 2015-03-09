@@ -40,15 +40,15 @@ module FakeSQS
 
         sorted_attributes.each do |attribute|
 
-            add_string_to_buffer(buffer, attribute["Name"])
-            add_string_to_buffer(buffer, attribute["DataType"])
+            add_string_to_buffer(buffer, attribute["Name"]) if (attribute["Name"])
+            add_string_to_buffer(buffer, attribute["Value.DataType"]) if (attribute["Value.DataType"])
 
-            if (attribute["StringValue"])
+            if (attribute["Value.StringValue"])
                 buffer << 1
-                add_string_to_buffer(buffer, attribute["StringValue"])
-            else
+                add_string_to_buffer(buffer, attribute["Value.StringValue"])
+            elsif (attribute["Value.BinaryValue"])
                 buffer << 2
-                add_binary_to_buffer(buffer, attribute["BinaryValue"])
+                add_binary_to_buffer(buffer, attribute["Value.BinaryValue"])
             end
         end
 
