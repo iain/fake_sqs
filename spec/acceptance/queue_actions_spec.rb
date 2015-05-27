@@ -1,5 +1,4 @@
 require "integration_spec_helper"
-require "pry"
 
 RSpec.describe "Actions for Queues", :sqs do
 
