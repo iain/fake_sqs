@@ -1,6 +1,6 @@
 require 'fake_sqs/collection_view'
 
-describe FakeSQS::CollectionView do
+RSpec.describe FakeSQS::CollectionView do
 
   def wrap(collection)
     FakeSQS::CollectionView.new(collection)
@@ -9,33 +9,33 @@ describe FakeSQS::CollectionView do
   it 'should correctly wrap an array' do
     array = %w{one two three four}
     view = wrap(array)
-    view[0].should == 'one'
-    view[1].should == 'two'
-    view[2].should == 'three'
-    view[3].should == 'four'
+    expect(view[0]).to eq 'one'
+    expect(view[1]).to eq 'two'
+    expect(view[2]).to eq 'three'
+    expect(view[3]).to eq 'four'
   end
 
   it 'should correctly wrap a hash' do
     hash = { :one => 1, :two => 2, :three => 3 }
     view = wrap(hash)
-    view[:one].should == 1
-    view[:two].should == 2
-    view[:three].should == 3
+    expect(view[:one]).to eq 1
+    expect(view[:two]).to eq 2
+    expect(view[:three]).to eq 3
   end
 
   it 'should respond to empty correctly' do
-    wrap([]).should be_empty
-    wrap({'one' => 1}).should_not be_empty
+    expect(wrap([])).to be_empty
+    expect(wrap({'one' => 1})).to_not be_empty
   end
 
   it 'should be enumerable' do
     result = wrap([1, 2, 3]).map { |i| i * i }
-    result.should == [1, 4, 9]
+    expect(result).to eq [1, 4, 9]
   end
 
   it 'should respond to size/length' do
-    wrap([1, 2, 3]).size.should == 3
-    wrap([]).length.should == 0
+    expect(wrap([1, 2, 3]).size).to eq 3
+    expect(wrap([]).size).to eq 0
   end
 
 end

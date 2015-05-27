@@ -1,12 +1,12 @@
 require 'fake_sqs/message'
 
-describe FakeSQS::Message do
+RSpec.describe FakeSQS::Message do
 
   describe "#body" do
 
     it "is extracted from the MessageBody" do
       message = create_message("MessageBody" => "abc")
-      message.body.should eq "abc"
+      expect(message.body).to eq "abc"
     end
 
   end
@@ -15,7 +15,7 @@ describe FakeSQS::Message do
 
     it "is calculated from body" do
       message = create_message("MessageBody" => "abc")
-      message.md5.should eq "900150983cd24fb0d6963f7d28e17f72"
+      expect(message.md5).to eq "900150983cd24fb0d6963f7d28e17f72"
     end
 
   end
@@ -24,7 +24,7 @@ describe FakeSQS::Message do
 
     it "is generated" do
       message = create_message
-      message.id.should have(36).characters
+      expect(message.id.size).to eq 36
     end
 
   end
@@ -36,26 +36,26 @@ describe FakeSQS::Message do
     end
 
     it 'should default to nil' do
-      message.visibility_timeout.should be_nil
+      expect(message.visibility_timeout).to eq nil
     end
 
     it 'should be expired when it is nil' do
-      message.should be_expired
+      expect(message).to be_expired
     end
 
     it 'should be expired if set to a previous time' do
       message.visibility_timeout = Time.now - 1
-      message.should be_expired
+      expect(message).to be_expired
     end
 
     it 'should not be expired at a future date' do
       message.visibility_timeout = Time.now + 1
-      message.should_not be_expired
+      expect(message).not_to be_expired
     end
 
     it 'should not be expired when set to expire at a future date' do
       message.expire_at(5)
-      message.visibility_timeout.should be >=(Time.now + 4)
+      expect(message.visibility_timeout).to be >=(Time.now + 4)
     end
 
   end

@@ -2,11 +2,11 @@ require 'fake_sqs/responder'
 require 'active_support/core_ext/hash'
 require 'verbose_hash_fetch'
 
-describe FakeSQS::Responder do
+RSpec.describe FakeSQS::Responder do
 
   it "yields xml" do
-    xml = subject.call :GetQueueUrl do |xml|
-      xml.QueueUrl "example.com"
+    xml = subject.call :GetQueueUrl do |x|
+      x.QueueUrl "example.com"
     end
 
     data = Hash.from_xml(xml)
@@ -14,7 +14,7 @@ describe FakeSQS::Responder do
       fetch("GetQueueUrlResponse").
       fetch("GetQueueUrlResult").
       fetch("QueueUrl")
-    url.should eq "example.com"
+    expect(url).to eq "example.com"
   end
 
   it "skips result if no block is given" do
@@ -23,12 +23,12 @@ describe FakeSQS::Responder do
     data = Hash.from_xml(xml)
 
     response = data.fetch("DeleteQueueResponse")
-    response.should have_key("ResponseMetadata")
-    response.should_not have_key("DeleteQueueResult")
+    expect(response).to have_key("ResponseMetadata")
+    expect(response).not_to have_key("DeleteQueueResult")
   end
 
   it "has metadata" do
-    xml = subject.call :GetQueueUrl do |xml|
+    xml = subject.call :GetQueueUrl do |x|
     end
 
     data = Hash.from_xml(xml)
@@ -38,7 +38,7 @@ describe FakeSQS::Responder do
       fetch("ResponseMetadata").
       fetch("RequestId")
 
-    request_id.should have(36).characters
+    expect(request_id.size).to eq 36
   end
 
 end

@@ -1,4 +1,5 @@
-require 'rack/request'
+require 'rack'
+require 'yaml'
 
 module FakeSQS
   class ShowOutput
@@ -12,7 +13,7 @@ module FakeSQS
       result = @app.call(env)
       puts request.params.to_yaml
       puts
-      puts *result.last
+      puts(*result.last)
       result
     end
 

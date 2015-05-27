@@ -12,7 +12,7 @@ class FakeSQS::Actions::TheAction
 
 end
 
-describe FakeSQS::API do
+RSpec.describe FakeSQS::API do
 
   it "delegates actions to classes" do
     queues = double :queues
@@ -21,8 +21,8 @@ describe FakeSQS::API do
 
     response = api.call("TheAction", {:foo => "bar"})
 
-    response[:options].should eq :queues => queues
-    response[:params].should eq :foo => "bar"
+    expect(response[:options]).to eq :queues => queues
+    expect(response[:params]).to eq :foo => "bar"
   end
 
   it "raises InvalidAction for unknown actions" do
@@ -37,14 +37,14 @@ describe FakeSQS::API do
   it "resets queues" do
     queues = double :queues
     api = FakeSQS::API.new(:queues => queues)
-    queues.should_receive(:reset)
+    expect(queues).to receive(:reset)
     api.reset
   end
 
   it "expires messages in queues" do
     queues = double :queues
     api = FakeSQS::API.new(:queues => queues)
-    queues.should_receive(:expire)
+    expect(queues).to receive(:expire)
     api.expire
   end
 

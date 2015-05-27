@@ -1,6 +1,6 @@
 require 'fake_sqs/show_output'
 
-describe FakeSQS::ShowOutput do
+RSpec.describe FakeSQS::ShowOutput do
 
   after do
     $stdout = STDOUT
@@ -11,12 +11,12 @@ describe FakeSQS::ShowOutput do
     $stdout = StringIO.new
     middleware = FakeSQS::ShowOutput.new(app)
     env = {"rack.input" => ""}
-    app.should_receive(:call).with(env).and_return([200, {}, ["<xml>"]])
+    expect(app).to receive(:call).with(env).and_return([200, {}, ["<xml>"]])
 
     middleware.call(env)
 
     $stdout.rewind
-    $stdout.read.should eq "--- {}\n\n<xml>\n"
+    expect($stdout.read).to eq "--- {}\n\n<xml>\n"
   end
 
 end
