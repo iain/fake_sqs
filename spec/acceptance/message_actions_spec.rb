@@ -101,6 +101,26 @@ RSpec.describe "Actions for Messages", :sqs do
     expect(response.messages.size).to eq 0
   end
 
+  specify "PurgeQueue" do
+    sqs.send_message(
+      queue_url: queue_url,
+      message_body: "test1"
+    )
+    sqs.send_message(
+      queue_url: queue_url,
+      message_body: "test2"
+    )
+
+    sqs.purge_queue(
+      queue_url: queue_url,
+    )
+
+    response = sqs.receive_message(
+      queue_url: queue_url,
+    )
+    expect(response.messages.size).to eq 0
+  end
+
   specify "SendMessageBatch" do
     bodies = %w(a b c)
 
