@@ -19,6 +19,7 @@ Done so far are:
 * Deleting messages (and in batch)
 * Changing queue attributes (but not all, and no validation)
 * Setting visibility timeouts for messages
+* Purge Queue
 
 Certain bits are left off on purpose, to make it easier to work with, such as:
 
