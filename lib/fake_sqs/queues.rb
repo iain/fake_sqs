@@ -14,12 +14,9 @@ module FakeSQS
     end
 
     def create(name, options = {})
-      if database[name]
-        fail QueueNameExists, name
-      else
-        queue = queue_factory.new(options)
-        database[name] = queue
-      end
+      return database[name] if database[name]
+      queue = queue_factory.new(options)
+      database[name] = queue
     end
 
     def delete(name, options = {})
