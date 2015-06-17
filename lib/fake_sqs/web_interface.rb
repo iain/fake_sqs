@@ -1,9 +1,14 @@
 require 'sinatra/base'
+require 'sinatra/cross_origin'
 
 module FakeSQS
   class WebInterface < Sinatra::Base
 
     configure do
+      register Sinatra::CrossOrigin
+      enable :cross_origin
+      set :allow_origin, :any
+      set :allow_headers, ['X-Amz-User-Agent', 'X-Amz-Date', 'Authorization', 'Content-Type']
       use FakeSQS::CatchErrors, response: ErrorResponse
     end
 
@@ -16,6 +21,10 @@ module FakeSQS
     end
 
     get "/" do
+      200
+    end
+
+    options "/" do
       200
     end
 
