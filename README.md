@@ -159,8 +159,10 @@ Now you can use the `:sqs metadata to enable SQS integration:
 
 ``` ruby
 describe "something with sqs", :sqs do
-  it "should work" do
-    queue = Aws::SQS::Client.new(region: 'us-east-1').create_queue({queue_name: "my-queue"})
+  it "creates a queue called 'my-queue'" do
+    client = Aws::SQS::Client.new(region: 'us-east-1')
+    client.config.endpoint = $fake_sqs.uri
+    client.create_queue({queue_name: "my-queue"})
   end
 end
 ```
