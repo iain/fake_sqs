@@ -77,6 +77,17 @@ AWS.config(
 )
 ```
 
+```javascript
+var aws = require('aws-sdk');
+var sqs = new aws.SQS({
+  endpoint: 'http://localhost:4568',
+  apiVersion: '2012-11-05',
+  accessKeyId: 'access key id',
+  secretAccessKey: 'secret access key',
+  region: 'region'
+});
+```
+
 If you have the configuration options for other libraries, please give them to
 me.
 
