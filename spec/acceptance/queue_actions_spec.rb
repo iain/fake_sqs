@@ -8,10 +8,12 @@ RSpec.describe "Actions for Queues", :sqs do
   end
 
   specify "CreateQueue" do
-    response = sqs.create_queue(queue_name: "test-create-queue")
+    response = sqs.create_queue(queue_name: "test-create-queue",
+                                attributes: { "VisibilityTimeout" => "5" })
     expect(response.queue_url).to eq "http://0.0.0.0:4568/test-create-queue"
     response2 = sqs.get_queue_attributes(queue_url: response.queue_url)
     expect(response2.attributes.fetch("QueueArn")).to match %r"arn:aws:sqs:us-east-1:.+:test-create-queue"
+    expect(response2.attributes.fetch("VisibilityTimeout")).to eq "5"
   end
 
   specify "GetQueueUrl" do
