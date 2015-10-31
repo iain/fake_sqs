@@ -1,4 +1,5 @@
 require "forwardable"
+require "thread"
 
 module FakeSQS
   class MemoryDatabase
@@ -8,7 +9,7 @@ module FakeSQS
       :[], :[]=, :delete, :each, :select, :values
 
     def initialize
-      @in_transaction = false
+      @semaphore = Mutex.new
     end
 
     def load
@@ -16,15 +17,8 @@ module FakeSQS
     end
 
     def transaction
-      if @in_transaction
-        raise "Already in transaction"
-      else
-        @in_transaction = true
-        begin
-          yield
-        ensure
-          @in_transaction = false
-        end
+      @semaphore.synchronize do
+        yield
       end
     end
 
