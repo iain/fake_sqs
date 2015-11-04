@@ -2,13 +2,14 @@ module FakeSQS
   module Actions
     class ReceiveMessage
 
-      def initialize(options = {})
-        @server    = options.fetch(:server)
+      def initialize(request, options = {})
+        @request   = request
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
       end
 
-      def call(name, params)
+      def call(params)
+        name = params['queue']
         queue = @queues.get(name)
         messages = queue.receive_message(params)
         @responder.call :ReceiveMessage do |xml|

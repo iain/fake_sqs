@@ -2,13 +2,14 @@ module FakeSQS
   module Actions
     class DeleteMessage
 
-      def initialize(options = {})
-        @server    = options.fetch(:server)
+      def initialize(request, options = {})
+        @request   = request
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
       end
 
-      def call(name, params)
+      def call(params)
+        name = params['queue']
         queue = @queues.get(name)
 
         receipt = params.fetch("ReceiptHandle")

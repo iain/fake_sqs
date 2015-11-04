@@ -2,13 +2,14 @@ module FakeSQS
   module Actions
     class ChangeMessageVisibility
 
-      def initialize(options = {})
-        @server    = options.fetch(:server)
+      def initialize(request, options = {})
+        @request   = request
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
       end
 
-      def call(queue, params)
+      def call(params)
+        queue = params['queue']
         visibility = params.fetch("VisibilityTimeout")
         receipt = params.fetch("ReceiptHandle")
 

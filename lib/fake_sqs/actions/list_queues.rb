@@ -1,9 +1,10 @@
+require 'fake_sqs/helpers'
 module FakeSQS
   module Actions
     class ListQueues
 
-      def initialize(options = {})
-        @server    = options.fetch(:server)
+      def initialize(request, options = {})
+        @request   = request
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
       end
@@ -12,7 +13,7 @@ module FakeSQS
         found = @queues.list(params)
         @responder.call :ListQueues do |xml|
           found.each do |queue|
-            xml.QueueUrl @server.url_for(queue.name)
+            xml.QueueUrl FakeSQS::Helpers.queue_url(@request, queue.name)
           end
         end
       end

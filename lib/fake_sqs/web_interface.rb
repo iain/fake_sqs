@@ -36,7 +36,7 @@ module FakeSQS
         return settings.api.call(action, queue, params) unless queue.empty?
       end
 
-      settings.api.call(action, params)
+      settings.api.call(action, request, params)
     end
 
     post "/:queue" do |queue|

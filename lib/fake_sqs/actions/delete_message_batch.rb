@@ -2,13 +2,15 @@ module FakeSQS
   module Actions
     class DeleteMessageBatch
 
-      def initialize(options = {})
-        @server    = options.fetch(:server)
+      def initialize(request, options = {})
+        @request   = request
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
       end
 
-      def call(name, params)
+      def call(params)
+        name = params['queue']
+
         queue = @queues.get(name)
         receipts = params.select { |k,v| k =~ /DeleteMessageBatchRequestEntry\.\d+\.ReceiptHandle/ }
 
@@ -28,7 +30,6 @@ module FakeSQS
           end
         end
       end
-
     end
   end
 end
