@@ -32,6 +32,15 @@ RSpec.describe FakeSQS::Queue do
       send_message(options)
     end
 
+    it "should set the message's SentTimestamp attribute" do
+      expect(send_message.attributes["SentTimestamp"]).to eq (Time.now.to_i * 1000)
+    end
+
+    it "should set the SenderId of the sender" do
+      sender_id = send_message.attributes["SenderId"]
+      expect(sender_id).to be_a String
+      expect(sender_id.length).to eq 21
+    end
   end
 
   describe "#receive_message" do
@@ -116,6 +125,25 @@ RSpec.describe FakeSQS::Queue do
       expect(receive_message).to eq({})
     end
 
+    it "should increment the ApproximateReceiveCount" do
+      sent_message = send_message
+      expect(sent_message.attributes["ApproximateReceiveCount"]).to eq 0
+      queue.change_message_visibility(receive_message.keys.first, 0)
+      expect(sent_message.attributes["ApproximateReceiveCount"]).to eq 1
+      receive_message
+      expect(sent_message.attributes["ApproximateReceiveCount"]).to eq 2
+    end
+
+    it "should set the ApproximateFirstReceiveTimestamp only when the message is first received" do
+      sent_message = send_message
+      expect(sent_message.attributes["ApproximateFirstReceiveTimestamp"]).to eq nil
+      receive_time = (Time.now.to_i * 1000)
+      queue.change_message_visibility(receive_message.keys.first, 0)
+      expect(sent_message.attributes["ApproximateFirstReceiveTimestamp"]).to eq receive_time
+      sleep 1
+      receive_message
+      expect(sent_message.attributes["ApproximateFirstReceiveTimestamp"]).to eq receive_time
+    end
   end
 
   describe "#delete_message" do
