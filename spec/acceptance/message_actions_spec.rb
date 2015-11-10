@@ -43,6 +43,34 @@ RSpec.describe "Actions for Messages", :sqs do
     expect(response.messages.first.body).to eq body
   end
 
+  specify "ReceiveMessage with visibility_timeout parameter" do
+    body = "test 123"
+
+    sqs.send_message(
+      queue_url: queue_url,
+      message_body: body
+    )
+
+    sqs.receive_message(
+      queue_url: queue_url,
+      visibility_timeout: 0
+    )
+
+    sleep 1
+
+    response = sqs.receive_message(
+      queue_url: queue_url
+    )
+    expect(response.messages.size).to eq 1
+
+    sleep 1
+
+    response = sqs.receive_message(
+      queue_url: queue_url
+    )
+    expect(response.messages.size).to eq 0
+  end
+
   specify "DeleteMessage" do
     sqs.send_message(
       queue_url: queue_url,
