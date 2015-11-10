@@ -175,7 +175,7 @@ RSpec.describe "Actions for Messages", :sqs do
         message_body: "test"
       )
     end
-    
+
     result = sqs.receive_message(queue_url: queue_url, max_number_of_messages: 10)
 
     nothing = sqs.receive_message(queue_url: queue_url)
@@ -218,7 +218,7 @@ RSpec.describe "Actions for Messages", :sqs do
     )
     expect(nothing.messages.size).to eq 0
 
-    sleep(5)
+    sleep(7)
 
     same_message = sqs.receive_message(
       queue_url: queue_url,
