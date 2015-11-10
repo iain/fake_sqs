@@ -168,6 +168,31 @@ RSpec.describe "Actions for Messages", :sqs do
     expect(same_message.body).to eq body
   end
 
+  specify "set message timeout for batch of messages to 0" do
+    10.times do
+      sqs.send_message(
+        queue_url: queue_url,
+        message_body: "test"
+      )
+    end
+    
+    result = sqs.receive_message(queue_url: queue_url, max_number_of_messages: 10)
+
+    nothing = sqs.receive_message(queue_url: queue_url)
+    expect(nothing.messages.size).to eq 0
+
+
+    sqs.change_message_visibility_batch({
+      queue_url: queue_url,
+      entries: result.messages.map do |message| 
+        {id: message.message_id, receipt_handle: message.receipt_handle, visibility_timeout: 0}
+      end
+    })
+
+    full = sqs.receive_message(queue_url: queue_url, max_number_of_messages: 10)
+    expect(full.messages.size).to eq 10
+  end
+
   specify 'set message timeout and wait for message to come' do
 
     body = 'some-sample-message'
