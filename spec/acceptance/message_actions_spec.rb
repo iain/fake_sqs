@@ -218,6 +218,8 @@ RSpec.describe "Actions for Messages", :sqs do
     )
     expect(nothing.messages.size).to eq 0
 
+    # Changed from sleep 5 to sleep 7 due to race conditions in Travis build
+    # see https://github.com/iain/fake_sqs/pull/32
     sleep(7)
 
     same_message = sqs.receive_message(
