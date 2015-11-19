@@ -7,7 +7,6 @@ require 'fake_sqs/queue'
 require 'fake_sqs/queue_factory'
 require 'fake_sqs/queues'
 require 'fake_sqs/responder'
-require 'fake_sqs/server'
 require 'fake_sqs/version'
 require 'fake_sqs/memory_database'
 require 'fake_sqs/file_database'
@@ -40,20 +39,13 @@ module FakeSQS
 
     app.set :port, options[:port] if options[:port]
     app.set :bind, options[:host] if options[:host]
-    app.set :server, options[:server] if options[:server]
-    server = FakeSQS.server(port: options[:port], host: options[:host])
-    app.set :api, FakeSQS.api(server: server, database: options[:database])
+    app.set :api, FakeSQS.api(database: options[:database])
     app
-  end
-
-  def self.server(options = {})
-    Server.new(options)
   end
 
   def self.api(options = {})
     db = database_for(options.fetch(:database) { ":memory:" })
     API.new(
-      server: options.fetch(:server),
       queues: queues(db),
       responder: responder
     )

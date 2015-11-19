@@ -32,9 +32,9 @@ module FakeSQS
       end
     end
 
-    def call(action, *args)
+    def call(action, request, *args)
       if FakeSQS::Actions.const_defined?(action)
-        action = FakeSQS::Actions.const_get(action).new(options)
+        action = FakeSQS::Actions.const_get(action).new(options.merge(request: request))
         queues.transaction do
           action.call(*args)
         end

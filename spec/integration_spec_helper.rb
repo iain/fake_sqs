@@ -13,6 +13,9 @@ Aws.config.update(
   credentials: Aws::Credentials.new("fake", "fake"),
 )
 
+# See https://github.com/aws/aws-sdk-ruby/issues/777
+Aws::SQS::Client.remove_plugin(Aws::Plugins::SQSQueueUrls)
+
 db = ENV["SQS_DATABASE"] || ":memory:"
 puts "\n\e[34mRunning specs with database \e[33m#{db}\e[0m"
 
