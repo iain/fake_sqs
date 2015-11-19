@@ -3,7 +3,7 @@ module FakeSQS
     class SendMessageBatch
 
       def initialize(options = {})
-        @server    = options.fetch(:server)
+        @request   = options.fetch(:request)
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
       end
