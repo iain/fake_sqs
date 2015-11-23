@@ -234,7 +234,9 @@ RSpec.describe "Actions for Messages", :sqs do
     )
     expect(nothing.messages.size).to eq 0
 
-    sleep(5)
+    # Changed from sleep 5 to sleep 7 due to race conditions in Travis build
+    # see https://github.com/iain/fake_sqs/pull/32
+    sleep(7)
 
     same_message = sqs.receive_message(
       queue_url: queue_url,
@@ -267,6 +269,37 @@ RSpec.describe "Actions for Messages", :sqs do
         visibility_timeout: 30
       )
     }.to raise_error(Aws::SQS::Errors::MessageNotInflight)
+  end
+
+  specify 'should be moved to configured DLQ after maxReceiveCount if RedrivePolicy is set' do
+    dlq_queue_url = sqs.create_queue(queue_name: "TestSourceQueueDLQ").queue_url
+
+    dlq_arn = sqs.get_queue_attributes(queue_url: dlq_queue_url).attributes.fetch("QueueArn")
+    sqs.set_queue_attributes(
+      queue_url: queue_url, 
+      attributes: {
+        "RedrivePolicy" => "{\"deadLetterTargetArn\":\"#{dlq_arn}\",\"maxReceiveCount\":2}"
+      }
+    )
+
+    message_id = sqs.send_message(
+      queue_url: queue_url,
+      message_body: "test",
+    ).message_id
+
+
+    2.times do 
+      message = sqs.receive_message(queue_url: queue_url)
+      expect(message.messages.size).to eq(1)
+      expect(message.messages.first.message_id).to eq(message_id)
+      expire_message(message.messages.first)
+    end
+
+    expect(sqs.receive_message(queue_url: queue_url).messages.size).to eq(0)
+
+    message = sqs.receive_message(queue_url: dlq_queue_url)
+    expect(message.messages.size).to eq(1)
+    expect(message.messages.first.message_id).to eq(message_id)
   end
 
   def let_messages_in_flight_expire
