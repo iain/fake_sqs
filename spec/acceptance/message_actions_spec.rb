@@ -35,12 +35,53 @@ RSpec.describe "Actions for Messages", :sqs do
     )
 
     response = sqs.receive_message(
-      queue_url: queue_url,
+      queue_url: queue_url
     )
 
     expect(response.messages.size).to eq 1
-
     expect(response.messages.first.body).to eq body
+  end
+
+  specify "ReceiveMessage with attribute_names parameters" do
+    body = "test 123"
+
+    sqs.send_message(
+      queue_url: queue_url,
+      message_body: body
+    )
+
+    sent_time = Time.now.to_i * 1000
+
+    response = sqs.receive_message(
+      queue_url: queue_url,
+      attribute_names: ["All"]
+    ) 
+    
+    received_time = Time.now.to_i * 1000
+
+    expect(response.messages.first.attributes.reject{|k,v| k == "SenderId"}).to eq({
+      "SentTimestamp" => sent_time.to_s,
+      "ApproximateReceiveCount" => "1",
+      "ApproximateFirstReceiveTimestamp" => received_time.to_s
+    })
+    expect(response.messages.first.attributes["SenderId"]).to be_kind_of(String)
+    expire_message(response.messages.first)
+
+    response = sqs.receive_message(
+      queue_url: queue_url
+    )
+    expect(response.messages.first.attributes).to eq({})
+    expire_message(response.messages.first)
+
+    response = sqs.receive_message(
+      queue_url: queue_url,
+      attribute_names: ["SentTimestamp", "ApproximateReceiveCount", "ApproximateFirstReceiveTimestamp"]
+    )
+    expect(response.messages.first.attributes).to eq({
+      "SentTimestamp" => sent_time.to_s,
+      "ApproximateReceiveCount" => "3",
+      "ApproximateFirstReceiveTimestamp" => received_time.to_s
+    })
   end
 
   specify "DeleteMessage" do
@@ -193,7 +234,9 @@ RSpec.describe "Actions for Messages", :sqs do
     )
     expect(nothing.messages.size).to eq 0
 
-    sleep(5)
+    # Changed from sleep 5 to sleep 7 due to race conditions in Travis build
+    # see https://github.com/iain/fake_sqs/pull/32
+    sleep(7)
 
     same_message = sqs.receive_message(
       queue_url: queue_url,
@@ -228,8 +271,47 @@ RSpec.describe "Actions for Messages", :sqs do
     }.to raise_error(Aws::SQS::Errors::MessageNotInflight)
   end
 
+  specify 'should be moved to configured DLQ after maxReceiveCount if RedrivePolicy is set' do
+    dlq_queue_url = sqs.create_queue(queue_name: "TestSourceQueueDLQ").queue_url
+
+    dlq_arn = sqs.get_queue_attributes(queue_url: dlq_queue_url).attributes.fetch("QueueArn")
+    sqs.set_queue_attributes(
+      queue_url: queue_url, 
+      attributes: {
+        "RedrivePolicy" => "{\"deadLetterTargetArn\":\"#{dlq_arn}\",\"maxReceiveCount\":2}"
+      }
+    )
+
+    message_id = sqs.send_message(
+      queue_url: queue_url,
+      message_body: "test",
+    ).message_id
+
+
+    2.times do 
+      message = sqs.receive_message(queue_url: queue_url)
+      expect(message.messages.size).to eq(1)
+      expect(message.messages.first.message_id).to eq(message_id)
+      expire_message(message.messages.first)
+    end
+
+    expect(sqs.receive_message(queue_url: queue_url).messages.size).to eq(0)
+
+    message = sqs.receive_message(queue_url: dlq_queue_url)
+    expect(message.messages.size).to eq(1)
+    expect(message.messages.first.message_id).to eq(message_id)
+  end
+
   def let_messages_in_flight_expire
     $fake_sqs.expire
+  end
+
+  def expire_message(message)
+    sqs.change_message_visibility(
+      queue_url: queue_url,
+      receipt_handle: message.receipt_handle,
+      visibility_timeout: 0
+    )
   end
 
 end

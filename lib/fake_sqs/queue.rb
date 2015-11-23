@@ -1,6 +1,6 @@
 require 'securerandom'
 require 'fake_sqs/collection_view'
-
+require 'json'
 module FakeSQS
 
   MessageNotInflight = Class.new(RuntimeError)
@@ -45,7 +45,7 @@ module FakeSQS
 
     def send_message(options = {})
       with_lock do
-        message = message_factory.new(options)
+        message = options.fetch(:message){ message_factory.new(options) }
         @messages << message
         message
       end
@@ -65,10 +65,13 @@ module FakeSQS
 
         actual_amount.times do
           message = @messages.delete_at(rand(size))
-          message.expire_at(default_visibility_timeout)
-          receipt = generate_receipt
-          @messages_in_flight[receipt] = message
-          result[receipt] = message
+          unless check_message_for_dlq(message, options)
+            message.expire_at(default_visibility_timeout)
+            message.receive!
+            receipt = generate_receipt
+            @messages_in_flight[receipt] = message
+            result[receipt] = message
+          end
         end
       end
 
@@ -112,6 +115,17 @@ module FakeSQS
           message.expire_at(visibility)
         end
 
+      end
+    end
+
+    def check_message_for_dlq(message, options={})
+      if redrive_policy = queue_attributes["RedrivePolicy"] && JSON.parse(queue_attributes["RedrivePolicy"])
+        dlq = options[:queues].list.find{|queue| queue.arn == redrive_policy["deadLetterTargetArn"]}
+        if dlq && message.approximate_receive_count >= redrive_policy["maxReceiveCount"].to_i
+          dlq.send_message(message: message)
+          message.expire!
+          true
+        end
       end
     end
 
