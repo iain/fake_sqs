@@ -29,6 +29,15 @@ RSpec.describe FakeSQS::Message do
 
   end
 
+  describe "#delay_seconds" do
+
+    it "is generated" do
+      message = create_message({"DelaySeconds" => 10})
+      expect(message.delay_seconds).to eq 10
+    end
+
+  end
+
   describe 'visibility_timeout' do
 
     let :message do
