@@ -43,10 +43,12 @@ RSpec.describe FakeSQS::Queue do
     end
 
     it "gets the message with 'DelaySeconds' option" do
-      sent = send_message({ "DelaySeconds" => 1 })
+      delay_seconds = 3
+      sent = send_message({ "DelaySeconds" => delay_seconds })
       received = receive_message
       expect(received.values.first).to be_nil
-      sleep 1
+
+      allow(Time).to receive(:now).and_return(Time.now + delay_seconds)
       received = receive_message
       expect(received.values.first).to eq sent
     end
