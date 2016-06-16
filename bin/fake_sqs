@@ -8,7 +8,8 @@ require 'optparse'
 
 options = {
   :port => 4568,
-  :host => "0.0.0.0",
+  :bind => "0.0.0.0",
+  :host => "localhost",
   :verbose => false,
   :daemonize => false,
   :database => ":memory:"
@@ -24,7 +25,11 @@ parser = OptionParser.new do |o|
     options[:port] = port
   end
 
-  o.on "-o", "--bind HOST", "Host to bind to (default: #{options[:host]})" do |host|
+  o.on "-o", "--bind HOST", "Host to bind to (default: #{options[:bind]})" do |bind|
+    options[:bind] = bind
+  end
+
+  o.on "-o", "--host HOST", "Host for generated Queue URLs (default: #{options[:host]})" do |host|
     options[:host] = host
   end
 
