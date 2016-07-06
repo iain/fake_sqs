@@ -19,9 +19,9 @@ RSpec.describe FakeSQS::API do
     allow(queues).to receive(:transaction).and_yield
     api = FakeSQS::API.new(:queues => queues)
 
-    response = api.call("TheAction", {:foo => "bar"})
+    response = api.call("TheAction", {}, {:foo => "bar"})
 
-    expect(response[:options]).to eq :queues => queues
+    expect(response[:options]).to eq :queues => queues, :request => {}
     expect(response[:params]).to eq :foo => "bar"
   end
 

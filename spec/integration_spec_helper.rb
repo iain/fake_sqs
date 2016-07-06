@@ -18,7 +18,7 @@ puts "\n\e[34mRunning specs with database \e[33m#{db}\e[0m"
 
 $fake_sqs = FakeSQS::TestIntegration.new(
   database: db,
-  sqs_endpoint: "localhost",
+  sqs_endpoint: "0.0.0.0",
   sqs_port: 4568,
 )
 
