@@ -46,7 +46,7 @@ module FakeSQS
     end
 
     handle "/:queue", [:get, :post] do |queue|
-      settings.api.call(action, queue, params)
+      settings.api.call(action, request, queue, params)
     end
   end
 end
