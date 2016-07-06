@@ -17,6 +17,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.license       = "MIT"
 
+
+  gem.add_dependency "rack", "~> 2.0"
   gem.add_dependency "sinatra", "~> 2.0"
   gem.add_dependency "builder", "~> 3.2"
 
