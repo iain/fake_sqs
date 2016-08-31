@@ -29,6 +29,15 @@ RSpec.describe FakeSQS::Message do
 
   end
 
+  describe "#receive_count" do
+
+    it "is initialized to zero" do
+      message = create_message
+      expect(message.receive_count).to eq 0
+    end
+    
+  end
+
   describe 'visibility_timeout' do
 
     let :message do

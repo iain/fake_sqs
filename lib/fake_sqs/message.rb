@@ -4,12 +4,13 @@ module FakeSQS
   class Message
 
     attr_reader :body, :id, :md5
-    attr_accessor :visibility_timeout
+    attr_accessor :visibility_timeout, :receive_count
 
     def initialize(options = {})
       @body = options.fetch("MessageBody")
       @id = options.fetch("Id") { SecureRandom.uuid }
       @md5 = options.fetch("MD5") { Digest::MD5.hexdigest(@body) }
+      @receive_count = options.fetch("ApproximateReceiveCount") { 0 }
     end
 
     def expire!
@@ -29,6 +30,7 @@ module FakeSQS
         "MessageBody" => body,
         "Id" => id,
         "MD5" => md5,
+        "ApproximateReceiveCount" => receive_count,
       }
     end
 
