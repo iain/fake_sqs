@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.license       = "MIT"
 
-  gem.add_dependency "sinatra"
+  gem.add_dependency "sinatra", "~> 1"
   gem.add_dependency "builder"
 
   gem.add_development_dependency "rspec"
@@ -27,6 +27,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "faraday"
   gem.add_development_dependency "thin"
   gem.add_development_dependency "verbose_hash_fetch"
-  gem.add_development_dependency "activesupport"
+  gem.add_development_dependency "activesupport", "< 5"
 
 end
