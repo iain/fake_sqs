@@ -86,11 +86,10 @@ module FakeSQS
       end
     end
 
-    def wait_until_up(deadline = Time.now + 2)
-      fail "FakeSQS didn't start in time" if Time.now > deadline
-      unless up?
-        sleep 0.01
-        wait_until_up(deadline)
+    def wait_until_up(deadline = Time.now + 10)
+      until up?
+        raise "FakeSQS didn't start in time" unless Time.now < deadline
+        sleep 0.1
       end
     end
 
