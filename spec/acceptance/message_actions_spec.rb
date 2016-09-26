@@ -43,6 +43,39 @@ RSpec.describe "Actions for Messages", :sqs do
     expect(response.messages.first.body).to eq body
   end
 
+  specify "ReceiveMessage increases message receive count" do
+    body = "test 123"
+
+    sqs.send_message(
+      queue_url: queue_url,
+      message_body: body
+    )
+
+    response = sqs.receive_message(
+      queue_url: queue_url,
+      attribute_names: ['ApproximateReceiveCount']
+    )
+
+    message = response.messages.first
+    expect(message.body).to eq body
+    expect(message.attributes['ApproximateReceiveCount']).to eq '1'
+
+    sqs.change_message_visibility(
+      queue_url: queue_url,
+      receipt_handle: message.receipt_handle,
+      visibility_timeout: 0
+    )
+
+    response = sqs.receive_message(
+      queue_url: queue_url,
+      attribute_names: ['ApproximateReceiveCount']
+    )
+
+    message = response.messages.first
+    expect(message.body).to eq body
+    expect(message.attributes['ApproximateReceiveCount']).to eq '2'
+  end
+
   specify "DeleteMessage" do
     sqs.send_message(
       queue_url: queue_url,
