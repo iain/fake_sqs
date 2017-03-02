@@ -64,8 +64,9 @@ $ fake_sqs --database /path/to/database.yml
 
 Messages are not persisted, just the queues.
 
-This is an example of how to configure the official [aws-sdk gem] [aws-sdk], to
-let it talk to Fake SQS.
+This is an example of how to configure some of the official SDKs to let them talk to Fake SQS.
+
+### [Ruby] [aws-sdk-for-ruby]
 
 ``` ruby
 AWS.config(
@@ -77,6 +78,8 @@ AWS.config(
 )
 ```
 
+### [Javascript] [aws-sdk-js]
+
 ```javascript
 var aws = require('aws-sdk');
 var sqs = new aws.SQS({
@@ -86,6 +89,19 @@ var sqs = new aws.SQS({
   secretAccessKey: 'secret access key',
   region: 'region'
 });
+```
+
+### [PHP] [aws-sdk-php]
+
+```php
+$client = new Aws\Sqs\SqsClient([
+  'version'     => 'latest',
+  'endpoint'    => 'http://localhost:4568',
+  'credentials' => [
+    'key'    => 'access key id',
+    'secret' => 'secret access key'
+  ]
+]);
 ```
 
 If you have the configuration options for other libraries, please give them to
@@ -186,5 +202,7 @@ $ DEBUG=true SQS_DATABASE=tmp/sqs.yml rspec spec/acceptance
 
 
   [fake_dynamo]: https://github.com/ananthakumaran/fake_dynamo
-  [aws-sdk]: https://github.com/amazonwebservices/aws-sdk-for-ruby
+  [aws-sdk-for-ruby]: https://github.com/amazonwebservices/aws-sdk-for-ruby
+  [aws-sdk-js]: https://github.com/aws/aws-sdk-js
+  [aws-sdk-php]: https://github.com/aws/aws-sdk-php
   [fake_sns]: https://github.com/yourkarma/fake_sns
