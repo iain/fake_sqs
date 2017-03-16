@@ -2,6 +2,7 @@ require 'sinatra/base'
 
 module FakeSQS
   class WebInterface < Sinatra::Base
+    set :threaded, true
 
     configure do
       use FakeSQS::CatchErrors, response: ErrorResponse

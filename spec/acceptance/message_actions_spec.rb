@@ -43,6 +43,20 @@ RSpec.describe "Actions for Messages", :sqs do
     expect(response.messages.first.body).to eq body
   end
 
+  specify "ReceiveMessageWaitForTimeout" do
+    body = "test 123"
+
+    t1 = Time.now
+
+    response = sqs.receive_message(
+      queue_url: queue_url,
+      wait_time_seconds: 2
+    )
+
+    t2 = Time.now
+    expect((t2 - t1)).to be > 2
+  end
+
   specify "DeleteMessage" do
     sqs.send_message(
       queue_url: queue_url,

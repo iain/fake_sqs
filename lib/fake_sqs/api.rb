@@ -35,9 +35,7 @@ module FakeSQS
     def call(action, *args)
       if FakeSQS::Actions.const_defined?(action)
         action = FakeSQS::Actions.const_get(action).new(options)
-        queues.transaction do
-          action.call(*args)
-        end
+        action.call(*args)
       else
         fail InvalidAction, "Unknown (or not yet implemented) action: #{action}"
       end
