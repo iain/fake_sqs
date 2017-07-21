@@ -111,7 +111,6 @@ module FakeSQS
         else
           message.expire_at(visibility)
         end
-
       end
     end
 

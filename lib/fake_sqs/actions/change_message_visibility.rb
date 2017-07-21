@@ -3,7 +3,6 @@ module FakeSQS
     class ChangeMessageVisibility
 
       def initialize(options = {})
-        @server    = options.fetch(:server)
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
       end
