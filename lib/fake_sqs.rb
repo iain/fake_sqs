@@ -9,8 +9,8 @@ require 'fake_sqs/queues'
 require 'fake_sqs/responder'
 require 'fake_sqs/server'
 require 'fake_sqs/version'
-require 'fake_sqs/memory_database'
-require 'fake_sqs/file_database'
+require 'fake_sqs/databases/file'
+require 'fake_sqs/databases/memory'
 
 module FakeSQS
 

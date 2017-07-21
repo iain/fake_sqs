@@ -1,5 +1,5 @@
 require 'fake_sqs/queues'
-require 'fake_sqs/memory_database'
+require 'fake_sqs/databases/memory'
 
 RSpec.describe FakeSQS::Queues do
 
