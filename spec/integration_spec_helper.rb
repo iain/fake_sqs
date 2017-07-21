@@ -1,13 +1,6 @@
 require "aws-sdk"
 require "fake_sqs/test_integration"
 
-# Aws.config[:credentials] = {
-#   :use_ssl           => false,
-#   :sqs_endpoint      => "localhost",
-#   :sqs_port          => 4568,
-#   :access_key_id     => "fake access key",
-#   :secret_access_key => "fake secret key",
-# }
 Aws.config.update(
   region: "us-east-1",
   credentials: Aws::Credentials.new("fake", "fake"),

@@ -8,7 +8,6 @@ Gem::Specification.new do |gem|
   gem.version       = FakeSQS::VERSION
   gem.authors       = ["iain"]
   gem.email         = ["iain@iain.nl"]
-  gem.description   = %q{Provides a fake SQS server that you can run locally to test against}
   gem.summary       = %q{Provides a fake SQS server that you can run locally to test against}
   gem.homepage      = "https://github.com/iain/fake_sqs"
 
@@ -18,16 +17,14 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.license       = "MIT"
 
-  gem.add_dependency "sinatra"
-  gem.add_dependency "builder"
+  gem.add_dependency "sinatra", "~> 2.0"
+  gem.add_dependency "builder", "~> 3.2"
 
-  gem.add_development_dependency "rspec"
-  gem.add_development_dependency "rake"
-  gem.add_development_dependency "aws-sdk", "~> 2.0"
-  gem.add_development_dependency "rack-test"
-  gem.add_development_dependency "faraday"
-  gem.add_development_dependency "thin"
-  gem.add_development_dependency "verbose_hash_fetch"
-  gem.add_development_dependency "activesupport"
-
+  gem.add_development_dependency "rspec", "~> 3.6"
+  gem.add_development_dependency "rake", "~> 12.0"
+  gem.add_development_dependency "rack-test", "~> 0.7"
+  gem.add_development_dependency "aws-sdk", "~> 2.10"
+  gem.add_development_dependency "thin", "~> 1.7"
+  gem.add_development_dependency "verbose_hash_fetch", "~> 0.0"
+  gem.add_development_dependency "activesupport", "~> 5.1"
 end
