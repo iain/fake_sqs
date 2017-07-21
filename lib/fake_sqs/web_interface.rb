@@ -30,7 +30,7 @@ module FakeSQS
     end
 
     post "/" do
-      params['logger'] = logger
+      #params['logger'] = logger
       if params['QueueUrl']
         queue = URI.parse(params['QueueUrl']).path.gsub(/\//, '')
         return settings.api.call(action, queue, params) unless queue.empty?
