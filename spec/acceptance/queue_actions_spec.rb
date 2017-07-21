@@ -39,6 +39,22 @@ RSpec.describe "Actions for Queues", :sqs do
     ]
   end
 
+  specify "ListDeadLetterSourceQueues" do
+    dlq_queue_url = sqs.create_queue(queue_name: "source-list-DLQ").queue_url
+    dlq_arn = sqs.get_queue_attributes(queue_url: dlq_queue_url).attributes.fetch("QueueArn")
+    source_queue_urls = []
+    2.times do |time|
+      queue_url = sqs.create_queue(queue_name: "source-list-#{time}").queue_url
+      sqs.set_queue_attributes(queue_url: queue_url, 
+        attributes: {
+          "RedrivePolicy" => "{\"deadLetterTargetArn\":\"#{dlq_arn}\",\"maxReceiveCount\":10}"
+        }
+      )
+       source_queue_urls << queue_url
+    end
+    expect(sqs.list_dead_letter_source_queues(queue_url: dlq_queue_url).queue_urls).to eq source_queue_urls
+  end
+
   specify "DeleteQueue" do
     url = sqs.create_queue(queue_name: "test-delete").queue_url
     expect(sqs.list_queues.queue_urls.size).to eq 1
