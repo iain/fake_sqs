@@ -1,21 +1,27 @@
 require 'sinatra/base'
+require 'fake_sqs/catch_errors'
+require 'fake_sqs/error_response'
 
 module FakeSQS
   class WebInterface < Sinatra::Base
+
+    def self.handle(path, verbs, &block)
+      verbs.each do |verb|
+        send(verb, path, &block)
+      end
+    end
 
     configure do
       use FakeSQS::CatchErrors, response: ErrorResponse
     end
 
     helpers do
-
       def action
         params.fetch("Action")
       end
-
     end
 
-    get "/" do
+    get "/ping" do
       200
     end
 
@@ -29,7 +35,7 @@ module FakeSQS
       200
     end
 
-    post "/" do
+    handle "/", [:get, :post] do
       params['logger'] = logger
       if params['QueueUrl']
         queue = URI.parse(params['QueueUrl']).path.gsub(/\//, '')
@@ -39,9 +45,8 @@ module FakeSQS
       settings.api.call(action, params)
     end
 
-    post "/:queue" do |queue|
+    handle "/:queue", [:get, :post] do |queue|
       settings.api.call(action, queue, params)
     end
-
   end
 end
