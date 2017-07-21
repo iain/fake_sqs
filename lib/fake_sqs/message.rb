@@ -3,7 +3,7 @@ require 'securerandom'
 module FakeSQS
   class Message
 
-    attr_reader :body, :id, :md5, :approximate_receive_count, 
+    attr_reader :body, :id, :md5, :delay_seconds, :approximate_receive_count,
     :sender_id, :approximate_first_receive_timestamp, :sent_timestamp
     attr_accessor :visibility_timeout
 
@@ -14,6 +14,7 @@ module FakeSQS
       @sender_id = options.fetch("SenderId") { SecureRandom.uuid.delete('-').upcase[0...21] }
       @approximate_receive_count = 0
       @sent_timestamp = Time.now.to_i * 1000
+      @delay_seconds = options.fetch("DelaySeconds", 0).to_i
     end
 
     def expire!
@@ -31,6 +32,15 @@ module FakeSQS
 
     def expire_at(seconds)
       self.visibility_timeout = Time.now + seconds
+    end
+
+    def published?
+      if self.delay_seconds && self.delay_seconds > 0
+        elapsed_seconds = Time.now.to_i - (self.sent_timestamp.to_i / 1000)
+        elapsed_seconds >= self.delay_seconds
+      else
+        true
+      end
     end
 
     def attributes

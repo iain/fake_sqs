@@ -51,6 +51,17 @@ RSpec.describe FakeSQS::Queue do
       expect(received.values.first).to eq sent
     end
 
+    it "gets the message with 'DelaySeconds' option" do
+      delay_seconds = 3
+      sent = send_message({ "DelaySeconds" => delay_seconds })
+      received = receive_message
+      expect(received.values.first).to be_nil
+
+      allow(Time).to receive(:now).and_return(Time.now + delay_seconds)
+      received = receive_message
+      expect(received.values.first).to eq sent
+    end
+
     it "gets you a random message" do
       indexes = { :first => 0, :second => 0 }
       sample_group = 1_000
