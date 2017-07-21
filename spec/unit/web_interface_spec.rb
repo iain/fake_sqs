@@ -1,7 +1,7 @@
 require 'fake_sqs/web_interface'
 require 'rack/test'
 
-describe FakeSQS::WebInterface do
+RSpec.describe FakeSQS::WebInterface do
   include Rack::Test::Methods
 
   def app
