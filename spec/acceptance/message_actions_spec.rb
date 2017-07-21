@@ -265,6 +265,20 @@ RSpec.describe "Actions for Messages", :sqs do
     expect(message.messages.size).to eq(0)
   end
 
+  specify 'ChangeMessageVisibilityBatch' do
+    bodies = (1..10).map { |n| n.to_s }
+    queue.batch_send(*bodies)
+    messages = queue.receive_messages(:limit => 10)
+
+    queue.visible_messages.should == 0
+    queue.approximate_number_of_messages_not_visible.should == 10
+
+    queue.batch_change_visibility(0, messages)
+
+    queue.visible_messages.should == 10
+    queue.approximate_number_of_messages_not_visible.should == 0
+  end
+
   def let_messages_in_flight_expire
     $fake_sqs.expire
   end
