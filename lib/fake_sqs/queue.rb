@@ -66,6 +66,7 @@ module FakeSQS
         actual_amount.times do
           message = @messages.delete_at(rand(size))
           message.expire_at(default_visibility_timeout)
+          message.receive!
           receipt = generate_receipt
           @messages_in_flight[receipt] = message
           result[receipt] = message

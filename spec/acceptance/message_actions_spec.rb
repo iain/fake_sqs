@@ -35,12 +35,53 @@ RSpec.describe "Actions for Messages", :sqs do
     )
 
     response = sqs.receive_message(
-      queue_url: queue_url,
+      queue_url: queue_url
     )
 
     expect(response.messages.size).to eq 1
-
     expect(response.messages.first.body).to eq body
+  end
+
+  specify "ReceiveMessage with attribute_names parameters" do
+    body = "test 123"
+
+    sqs.send_message(
+      queue_url: queue_url,
+      message_body: body
+    )
+
+    sent_time = Time.now.to_i * 1000
+
+    response = sqs.receive_message(
+      queue_url: queue_url,
+      attribute_names: ["All"]
+    ) 
+    
+    received_time = Time.now.to_i * 1000
+
+    expect(response.messages.first.attributes.reject{|k,v| k == "SenderId"}).to eq({
+      "SentTimestamp" => sent_time.to_s,
+      "ApproximateReceiveCount" => "1",
+      "ApproximateFirstReceiveTimestamp" => received_time.to_s
+    })
+    expect(response.messages.first.attributes["SenderId"]).to be_kind_of(String)
+    expire_message(response.messages.first)
+
+    response = sqs.receive_message(
+      queue_url: queue_url
+    )
+    expect(response.messages.first.attributes).to eq({})
+    expire_message(response.messages.first)
+
+    response = sqs.receive_message(
+      queue_url: queue_url,
+      attribute_names: ["SentTimestamp", "ApproximateReceiveCount", "ApproximateFirstReceiveTimestamp"]
+    )
+    expect(response.messages.first.attributes).to eq({
+      "SentTimestamp" => sent_time.to_s,
+      "ApproximateReceiveCount" => "3",
+      "ApproximateFirstReceiveTimestamp" => received_time.to_s
+    })
   end
 
   specify "DeleteMessage" do
@@ -267,6 +308,14 @@ RSpec.describe "Actions for Messages", :sqs do
 
   def let_messages_in_flight_expire
     $fake_sqs.expire
+  end
+
+  def expire_message(message)
+    sqs.change_message_visibility(
+      queue_url: queue_url,
+      receipt_handle: message.receipt_handle,
+      visibility_timeout: 0
+    )
   end
 
 end
