@@ -4,6 +4,7 @@ require 'fake_sqs/error_response'
 
 module FakeSQS
   class WebInterface < Sinatra::Base
+    set :threaded, true
 
     def self.handle(path, verbs, &block)
       verbs.each do |verb|
