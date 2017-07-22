@@ -9,7 +9,7 @@ RSpec.describe "Actions for Queues", :sqs do
 
   specify "CreateQueue" do
     response = sqs.create_queue(queue_name: "test-create-queue")
-    expect(response.queue_url).to eq "http://0.0.0.0:4568/test-create-queue"
+    expect(response.queue_url).to eq "http://localhost:4568/test-create-queue"
     response2 = sqs.get_queue_attributes(queue_url: response.queue_url)
     expect(response2.attributes.fetch("QueueArn")).to match %r"arn:aws:sqs:us-east-1:.+:test-create-queue"
   end
@@ -17,15 +17,15 @@ RSpec.describe "Actions for Queues", :sqs do
   specify "GetQueueUrl" do
     sqs.create_queue(queue_name: "test-get-queue-url")
     response = sqs.get_queue_url(queue_name: "test-get-queue-url")
-    expect(response.queue_url).to eq "http://0.0.0.0:4568/test-get-queue-url"
+    expect(response.queue_url).to eq "http://localhost:4568/test-get-queue-url"
   end
 
   specify "ListQueues" do
     sqs.create_queue(queue_name: "test-list-1")
     sqs.create_queue(queue_name: "test-list-2")
     expect(sqs.list_queues.queue_urls).to eq [
-      "http://0.0.0.0:4568/test-list-1",
-      "http://0.0.0.0:4568/test-list-2"
+      "http://localhost:4568/test-list-1",
+      "http://localhost:4568/test-list-2"
     ]
   end
 
@@ -34,8 +34,8 @@ RSpec.describe "Actions for Queues", :sqs do
     sqs.create_queue(queue_name: "test-list-2")
     sqs.create_queue(queue_name: "other-list-3")
     expect(sqs.list_queues(queue_name_prefix: "test").queue_urls).to eq [
-      "http://0.0.0.0:4568/test-list-1",
-      "http://0.0.0.0:4568/test-list-2",
+      "http://localhost:4568/test-list-1",
+      "http://localhost:4568/test-list-2",
     ]
   end
 
