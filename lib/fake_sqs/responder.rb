@@ -5,7 +5,7 @@ module FakeSQS
   class Responder
 
     def call(name, &block)
-      xml = Builder::XmlMarkup.new(:indent => 4)
+      xml = Builder::XmlMarkup.new
       xml.tag! "#{name}Response" do
         if block
           xml.tag! "#{name}Result" do
