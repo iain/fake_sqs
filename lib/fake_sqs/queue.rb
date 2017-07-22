@@ -1,3 +1,4 @@
+require 'monitor'
 require 'securerandom'
 require 'fake_sqs/collection_view'
 require 'json'
