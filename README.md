@@ -11,13 +11,13 @@ Many features are supported and if you miss something, open a pull.
 ## Installation
 
 ```
-gem install fakesqs
+gem install fake_sqs
 ```
 
 ## Running
 
 ```
-fakesqs --database /path/to/database.yml
+fake_sqs --database /path/to/database.yml
 ```
 
 ## Development
