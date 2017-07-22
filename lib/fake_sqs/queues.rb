@@ -1,6 +1,5 @@
 module FakeSQS
 
-  QueueNameExists  = Class.new(RuntimeError)
   NonExistentQueue = Class.new(RuntimeError)
 
   class Queues
