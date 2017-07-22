@@ -13,6 +13,7 @@ $fake_sqs = FakeSQS::TestIntegration.new(
   database: db,
   sqs_endpoint: "localhost",
   sqs_port: 4568,
+  start_timeout: 2,
 )
 
 RSpec.configure do |config|
