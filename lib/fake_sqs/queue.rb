@@ -2,6 +2,7 @@ require 'monitor'
 require 'securerandom'
 require 'fake_sqs/collection_view'
 require 'json'
+
 module FakeSQS
 
   MessageNotInflight = Class.new(RuntimeError)
@@ -47,7 +48,9 @@ module FakeSQS
     def send_message(options = {})
       with_lock do
         message = options.fetch(:message){ message_factory.new(options) }
-        @messages << message
+        if message
+          @messages[message.receipt] = message
+        end
         message
       end
     end
@@ -64,17 +67,16 @@ module FakeSQS
 
       with_lock do
         actual_amount = amount > published_size ? published_size : amount
-        published_messages = @messages.select { |m| m.published? }
+        published_messages = @messages.values.select { |m| m.published? }
 
         actual_amount.times do
           message = published_messages.delete_at(rand(published_size))
-          @messages.delete(message)
+          @messages.delete(message.receipt)
           unless check_message_for_dlq(message, options)
             message.expire_at(visibility_timeout)
             message.receive!
-            receipt = generate_receipt
-            @messages_in_flight[receipt] = message
-            result[receipt] = message
+            @messages_in_flight[message.receipt] = message
+            result[message.receipt] = message
           end
         end
       end
@@ -100,8 +102,8 @@ module FakeSQS
         end
         expired.each do |receipt,message|
           message.expire!
-          @messages << message
-          delete_message(receipt)
+          @messages[receipt] = message
+          @messages_in_flight.delete(receipt)
         end
       end
     end
@@ -113,8 +115,8 @@ module FakeSQS
 
         if visibility == 0
           message.expire!
-          @messages << message
-          delete_message(receipt)
+          @messages[receipt] = message
+          @messages_in_flight.delete(receipt)
         else
           message.expire_at(visibility)
         end
@@ -134,13 +136,14 @@ module FakeSQS
 
     def delete_message(receipt)
       with_lock do
+        @messages.delete(receipt)
         @messages_in_flight.delete(receipt)
       end
     end
 
     def reset
       with_lock do
-        @messages = []
+        @messages = {}
         @messages_view = FakeSQS::CollectionView.new(@messages)
         reset_messages_in_flight
       end
@@ -148,7 +151,7 @@ module FakeSQS
 
     def expire
       with_lock do
-        @messages += @messages_in_flight.values
+        @messages_in_flight.merge!(@messages)
         reset_messages_in_flight
       end
     end
@@ -169,15 +172,11 @@ module FakeSQS
     end
 
     def size
-      messages.size
+      @messages.size
     end
 
     def published_size
-      messages.select { |m| m.published? }.size
-    end
-
-    def generate_receipt
-      SecureRandom.hex
+      @messages.values.select { |m| m.published? }.size
     end
 
     def with_lock

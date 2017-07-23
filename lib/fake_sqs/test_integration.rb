@@ -75,7 +75,7 @@ module FakeSQS
     end
 
     def verbose
-      if debug?
+      if options[:verbose]
         "--verbose"
       else
         "--no-verbose"
