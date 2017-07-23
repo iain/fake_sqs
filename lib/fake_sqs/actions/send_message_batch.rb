@@ -8,9 +8,8 @@ module FakeSQS
         @responder = options.fetch(:responder)
       end
 
-      def call(name, params)
-        queue = @queues.get(name)
-
+      def call(queue_name, params)
+        queue = @queues.get(queue_name)
         messages = params.select { |k,v| k =~ /SendMessageBatchRequestEntry\.\d+\.MessageBody/ }
 
         results = {}

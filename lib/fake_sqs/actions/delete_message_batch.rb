@@ -8,16 +8,14 @@ module FakeSQS
         @responder = options.fetch(:responder)
       end
 
-      def call(name, params)
-        queue = @queues.get(name)
+      def call(queue_name, params)
+        queue = @queues.get(queue_name)
         receipts = params.select { |k,v| k =~ /DeleteMessageBatchRequestEntry\.\d+\.ReceiptHandle/ }
 
-        deleted = []
-
-        receipts.each do |key, value|
+        deleted = receipts.each do |key, value|
           id = key.split('.')[1]
-          queue.delete_message(value)
-          deleted << params.fetch("DeleteMessageBatchRequestEntry.#{id}.Id")
+          queue.delete_message(value) # Broken, can only delete in-flight messages
+          params.fetch("DeleteMessageBatchRequestEntry.#{id}.Id")
         end
 
         @responder.call :DeleteMessageBatch do |xml|

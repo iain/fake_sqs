@@ -8,8 +8,8 @@ module FakeSQS
         @responder = options.fetch(:responder)
       end
 
-      def call(name, params)
-        queue = @queues.get(name)
+      def call(queue_name, params)
+        queue = @queues.get(queue_name)
         message = queue.send_message(params)
         @responder.call :SendMessage do |xml|
           xml.MD5OfMessageBody message.md5

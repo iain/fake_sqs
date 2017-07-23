@@ -11,7 +11,6 @@ RSpec.describe "Actions for Messages", :sqs do
   end
 
   let(:sqs) { Aws::SQS::Client.new }
-
   let(:queue_url) { sqs.get_queue_url(queue_name: QUEUE_NAME).queue_url }
 
   specify "SendMessage" do
@@ -120,26 +119,31 @@ RSpec.describe "Actions for Messages", :sqs do
     messages_response = sqs.receive_message(
       queue_url: queue_url,
       max_number_of_messages: 2,
+      visibility_timeout: 0,
     )
-
-    entries = messages_response.messages.map { |msg|
-      {
-        id: SecureRandom.uuid,
-        receipt_handle: msg.receipt_handle,
-      }
-    }
-
-    sqs.delete_message_batch(
-      queue_url: queue_url,
-      entries: entries,
-    )
+    expect(messages_response.messages.size).to eq 2
 
     let_messages_in_flight_expire
 
-    response = sqs.receive_message(
+    response = sqs.delete_message_batch(
       queue_url: queue_url,
+      entries: messages_response.messages.map { |msg|
+        {
+          id: SecureRandom.uuid,
+          receipt_handle: msg.receipt_handle,
+        }
+      },
     )
-    expect(response.messages.size).to eq 0
+    expect(response.successful.size).to eq(2)
+
+    let_messages_in_flight_expire
+
+    messages_response = sqs.receive_message(
+      queue_url: queue_url,
+      max_number_of_messages: 2,
+      visibility_timeout: 0,
+    )
+    expect(messages_response.messages.size).to eq 0
   end
 
   specify "PurgeQueue" do
@@ -185,7 +189,7 @@ RSpec.describe "Actions for Messages", :sqs do
   specify "SendMessageBatch" do
     bodies = %w(a b c)
 
-    sqs.send_message_batch(
+    response = sqs.send_message_batch(
       queue_url: queue_url,
       entries: bodies.map { |bd|
         {
@@ -194,6 +198,8 @@ RSpec.describe "Actions for Messages", :sqs do
         }
       }
     )
+
+    expect(response.successful.size).to eq(3)
 
     messages_response = sqs.receive_message(
       queue_url: queue_url,
@@ -245,7 +251,7 @@ RSpec.describe "Actions for Messages", :sqs do
     sqs.change_message_visibility(
       queue_url: queue_url,
       receipt_handle: message.receipt_handle,
-      visibility_timeout: 2
+      visibility_timeout: 1
     )
 
     nothing = sqs.receive_message(
@@ -253,9 +259,7 @@ RSpec.describe "Actions for Messages", :sqs do
     )
     expect(nothing.messages.size).to eq 0
 
-    # Changed from sleep 5 to sleep 7 due to race conditions in Travis build
-    # see https://github.com/iain/fake_sqs/pull/32
-    sleep(7)
+    sleep(2)
 
     same_message = sqs.receive_message(
       queue_url: queue_url,
@@ -292,7 +296,7 @@ RSpec.describe "Actions for Messages", :sqs do
 
   specify 'ChangeMessageVisibilityBatch' do
     bodies = (1..10).map { |n| n.to_s }
-    sqs.send_message_batch(
+    response = sqs.send_message_batch(
       queue_url: queue_url,
       entries: bodies.map { |bd|
         {
@@ -301,15 +305,16 @@ RSpec.describe "Actions for Messages", :sqs do
         }
       }
     )
+    expect(response.successful.size).to eq(10)
+
     message = sqs.receive_message(
       queue_url: queue_url,
       max_number_of_messages: 10,
       visibility_timeout: 0,
     )
-
     expect(message.messages.size).to eq(10)
 
-    sqs.change_message_visibility_batch(
+    response = sqs.change_message_visibility_batch(
       queue_url: queue_url,
       entries: message.messages.map { |m|
         {
@@ -319,12 +324,12 @@ RSpec.describe "Actions for Messages", :sqs do
         }
       }
     )
+    expect(response.successful.size).to eq(10)
 
     message = sqs.receive_message(
       queue_url: queue_url,
       max_number_of_messages: 10,
     )
-
     expect(message.messages.size).to eq(0)
   end
 

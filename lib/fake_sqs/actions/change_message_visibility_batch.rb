@@ -7,7 +7,9 @@ module FakeSQS
         @responder = options.fetch(:responder)
       end
 
-      def call(queue, params)
+      def call(queue_name, params)
+        queue = @queues.get(queue_name)
+
         keys = params.keys.map do |key|
           case key
             when /^ChangeMessageVisibilityBatchRequestEntry\.(\w+)\.Id$/
@@ -15,19 +17,17 @@ module FakeSQS
           end
         end.compact
 
-        messages = keys.map do |key|
+        ids = keys.map do |key|
           receipt = params.fetch("ChangeMessageVisibilityBatchRequestEntry.#{key}.ReceiptHandle")
           timeout = params.fetch("ChangeMessageVisibilityBatchRequestEntry.#{key}.VisibilityTimeout").to_i
-          @queues.get(queue).change_message_visibility(receipt, timeout)
+          queue.change_message_visibility(receipt, timeout)
           params.fetch("ChangeMessageVisibilityBatchRequestEntry.#{key}.Id")
         end
 
         @responder.call :ChangeMessageVisibilityBatch do |xml|
-          xml.ChangeMessageVisibilityBatchResult do
-            messages.each do |message|
-              xml.ChangeMessageVisibilityBatchResultEntry do
-                xml.Id message
-              end
+          ids.each do |id|
+            xml.ChangeMessageVisibilityBatchResultEntry do
+              xml.Id id
             end
           end
         end
