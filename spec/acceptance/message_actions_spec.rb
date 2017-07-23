@@ -91,14 +91,15 @@ RSpec.describe "Actions for Messages", :sqs do
 
     message1 = sqs.receive_message(
       queue_url: queue_url,
+      visibility_timeout: 0,
     ).messages.first
+
+    sleep(1)
 
     sqs.delete_message(
       queue_url: queue_url,
       receipt_handle: message1.receipt_handle,
     )
-
-    let_messages_in_flight_expire
 
     response = sqs.receive_message(
       queue_url: queue_url,
@@ -123,7 +124,7 @@ RSpec.describe "Actions for Messages", :sqs do
     )
     expect(messages_response.messages.size).to eq 2
 
-    let_messages_in_flight_expire
+    sleep(1)
 
     response = sqs.delete_message_batch(
       queue_url: queue_url,
@@ -136,7 +137,7 @@ RSpec.describe "Actions for Messages", :sqs do
     )
     expect(response.successful.size).to eq(2)
 
-    let_messages_in_flight_expire
+    sleep(1)
 
     messages_response = sqs.receive_message(
       queue_url: queue_url,
