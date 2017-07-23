@@ -29,7 +29,7 @@ module FakeSQS
       @timer     = Thread.new do
         while @run_timer
           queues.timeout_messages!
-          sleep(5)
+          sleep(0.1)
         end
       end
     end
