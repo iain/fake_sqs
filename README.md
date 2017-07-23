@@ -1,4 +1,4 @@
-# Fake SQS [![Build Status](https://secure.travis-ci.org/iain/fake_sqs.png)](http://travis-ci.org/iain/fake_sqs)
+# Fake SQS [![Build Status](https://api.travis-ci.org/iain/fake_sqs.svg?branch=master)](http://travis-ci.org/iain/fake_sqs) [![Gem Version](https://badge.fury.io/rb/fake_sqs.svg)](https://badge.fury.io/rb/fake_sqs)
 
 Fake SQS is a lightweight server that mocks the Amazon SQS API.
 
