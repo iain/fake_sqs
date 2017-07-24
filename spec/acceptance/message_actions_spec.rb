@@ -93,12 +93,12 @@ RSpec.describe "Actions for Messages", :sqs do
       queue_url: queue_url,
     ).messages.first
 
+    let_messages_in_flight_expire
+
     sqs.delete_message(
       queue_url: queue_url,
       receipt_handle: message1.receipt_handle,
     )
-
-    let_messages_in_flight_expire
 
     response = sqs.receive_message(
       queue_url: queue_url,
@@ -119,7 +119,6 @@ RSpec.describe "Actions for Messages", :sqs do
     messages_response = sqs.receive_message(
       queue_url: queue_url,
       max_number_of_messages: 2,
-      visibility_timeout: 0,
     )
     expect(messages_response.messages.size).to eq 2
 
@@ -136,12 +135,9 @@ RSpec.describe "Actions for Messages", :sqs do
     )
     expect(response.successful.size).to eq(2)
 
-    let_messages_in_flight_expire
-
     messages_response = sqs.receive_message(
       queue_url: queue_url,
       max_number_of_messages: 2,
-      visibility_timeout: 0,
     )
     expect(messages_response.messages.size).to eq 0
   end
@@ -167,7 +163,7 @@ RSpec.describe "Actions for Messages", :sqs do
   end
 
   specify "DeleteQueue" do
-    sqs.send_message(
+    sent_message = sqs.send_message(
       queue_url: queue_url,
       message_body: "test1"
     )
@@ -175,7 +171,10 @@ RSpec.describe "Actions for Messages", :sqs do
     response = sqs.receive_message(
       queue_url: queue_url,
     )
+    expect(response.messages[0].message_id).to eq sent_message.message_id
     expect(response.messages.size).to eq 1
+
+    let_messages_in_flight_expire
 
     sqs.delete_queue(queue_url: queue_url)
     sqs.create_queue(queue_name: QUEUE_NAME)
@@ -198,14 +197,12 @@ RSpec.describe "Actions for Messages", :sqs do
         }
       }
     )
-
     expect(response.successful.size).to eq(3)
 
     messages_response = sqs.receive_message(
       queue_url: queue_url,
       max_number_of_messages: 3,
     )
-
     expect(messages_response.messages.map(&:body)).to match_array bodies
   end
 
@@ -219,14 +216,14 @@ RSpec.describe "Actions for Messages", :sqs do
 
     message = sqs.receive_message(
       queue_url: queue_url,
+      visibility_timeout: 10,
     ).messages.first
-
     expect(message.body).to eq body
 
     sqs.change_message_visibility(
       queue_url: queue_url,
       receipt_handle: message.receipt_handle,
-      visibility_timeout: 0
+      visibility_timeout: 0,
     )
 
     same_message = sqs.receive_message(
@@ -245,13 +242,14 @@ RSpec.describe "Actions for Messages", :sqs do
 
     message = sqs.receive_message(
       queue_url: queue_url,
+      visibility_timeout: 10,
     ).messages.first
     expect(message.body).to eq body
 
     sqs.change_message_visibility(
       queue_url: queue_url,
       receipt_handle: message.receipt_handle,
-      visibility_timeout: 1
+      visibility_timeout: 1,
     )
 
     nothing = sqs.receive_message(
@@ -268,27 +266,15 @@ RSpec.describe "Actions for Messages", :sqs do
   end
 
   specify 'should fail if trying to update the visibility_timeout for a message that is not in flight' do
-    body = 'some-sample-message'
-    sqs.send_message(
+    response = sqs.send_message(
       queue_url: queue_url,
-      message_body: body,
-    )
-
-    message = sqs.receive_message(
-      queue_url: queue_url,
-    ).messages.first
-    expect(message.body).to eq body
-
-    sqs.change_message_visibility(
-      queue_url: queue_url,
-      receipt_handle: message.receipt_handle,
-      visibility_timeout: 0
+      message_body: 'some-sample-message',
     )
 
     expect {
       sqs.change_message_visibility(
         queue_url: queue_url,
-        receipt_handle: message.receipt_handle,
+        receipt_handle: response.message_id,
         visibility_timeout: 30
       )
     }.to raise_error(Aws::SQS::Errors::MessageNotInflight)
@@ -310,7 +296,7 @@ RSpec.describe "Actions for Messages", :sqs do
     message = sqs.receive_message(
       queue_url: queue_url,
       max_number_of_messages: 10,
-      visibility_timeout: 0,
+      visibility_timeout: 1,
     )
     expect(message.messages.size).to eq(10)
 
@@ -325,6 +311,8 @@ RSpec.describe "Actions for Messages", :sqs do
       }
     )
     expect(response.successful.size).to eq(10)
+
+    sleep(2)
 
     message = sqs.receive_message(
       queue_url: queue_url,
@@ -372,7 +360,7 @@ RSpec.describe "Actions for Messages", :sqs do
     sqs.change_message_visibility(
       queue_url: queue_url,
       receipt_handle: message.receipt_handle,
-      visibility_timeout: 0
+      visibility_timeout: 0,
     )
   end
 

@@ -56,6 +56,7 @@ module FakeSQS
     end
 
     def delete(key)
+      @queue_objects.delete(key)
       storage.delete(key)
     end
 

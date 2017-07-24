@@ -1,4 +1,5 @@
 require 'securerandom'
+require 'digest/sha1'
 
 module FakeSQS
   class Message
@@ -50,6 +51,10 @@ module FakeSQS
         "ApproximateReceiveCount"=> approximate_receive_count,
         "SentTimestamp"=> sent_timestamp
       }
+    end
+
+    def receipt
+      Digest::SHA1.hexdigest self.id
     end
 
   end
