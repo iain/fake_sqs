@@ -151,7 +151,8 @@ module FakeSQS
 
     def expire
       with_lock do
-        @messages_in_flight.merge!(@messages)
+        @messages.merge!(@messages_in_flight)
+        @messages_in_flight.clear()
         reset_messages_in_flight
       end
     end
