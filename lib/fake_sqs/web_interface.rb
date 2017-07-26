@@ -1,5 +1,4 @@
 require 'sinatra/base'
-require 'fake_sqs/helper'
 require 'fake_sqs/catch_errors'
 require 'fake_sqs/error_response'
 
@@ -38,7 +37,8 @@ module FakeSQS
 
     handle "/", [:get, :post] do
       if params['QueueUrl']
-        queue_name = Helper::queue_from_url(params['QueueUrl'])
+        uri = URI.parse(params['QueueUrl'])
+        queue_name = uri.path.tr('/', '')
         return settings.api.call(action, request, queue_name, params) unless queue_name.empty?
       end
 
