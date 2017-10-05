@@ -25,9 +25,9 @@ module FakeSQS
     def initialize(options = {})
       @queues    = options.fetch(:queues)
       @options   = options
-      @run_timer = true
+      @halt      = false
       @timer     = Thread.new do
-        while @run_timer
+        until @halt
           queues.timeout_messages!
           sleep(0.1)
         end
@@ -37,11 +37,25 @@ module FakeSQS
     def call(action, request, *args)
       if FakeSQS::Actions.const_defined?(action)
         action = FakeSQS::Actions.const_get(action).new(options.merge({:request => request}))
-        queues.transaction do
-          action.call(*args)
+        if action.respond_to?(:satisfied?)
+          result = nil
+          until @halt
+            result = attempt_once(action, *args)
+            break if action.satisfied?
+            sleep(0.1)
+          end
+          result
+        else
+          attempt_once(action, *args)
         end
       else
         fail InvalidAction, "Unknown (or not yet implemented) action: #{action}"
+      end
+    end
+
+    def attempt_once(action, *args)
+      queues.transaction do
+        action.call(*args)
       end
     end
 
@@ -56,7 +70,7 @@ module FakeSQS
     end
 
     def stop
-      @run_timer = false
+      @halt = true
     end
 
   end
