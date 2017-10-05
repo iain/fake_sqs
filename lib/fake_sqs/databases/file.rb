@@ -8,6 +8,19 @@ module FakeSQS
     def initialize(filename)
       @filename = filename
       @queue_objects = {}
+      unless thread_safe_store?
+        # before ruby 2.4, YAML::Store cannot be declared thread safe
+        #
+        # without that declaration, attempting to have some thread B enter a
+        # store.transaction on the store while another thread A is in one
+        # already will raise an error unnecessarily.
+        #
+        # to prevent this, we'll use our own mutex around store.transaction,
+        # so only one thread can even _try_ to enter the transaction at a
+        # time.
+        @store_mutex = Mutex.new
+        @store_mutex_owner = nil
+      end
     end
 
     def load
@@ -108,26 +121,9 @@ module FakeSQS
     end
 
     def store
-      unless @store
-        if thread_safe_store?
-          # specify store as thread safe
-          @store = YAML::Store.new(filename, true)
-        else
-          # before ruby 2.4, YAML::Store cannot be declared thread safe
-          @store = YAML::Store.new(filename)
-
-          # without that declaration, attempting to have some thread B enter a
-          # store.transaction on the store while another thread A is in one
-          # already will raise an error unnecessarily.
-          #
-          # to prevent this, we'll use our own mutex around store.transaction,
-          # so only one thread can even _try_ to enter the transaction at a
-          # time.
-          @store_mutex = Mutex.new
-          @store_mutex_owner = nil
-        end
-      end
-      @store
+      @store ||= thread_safe_store? ?
+        YAML::Store.new(filename, true) :
+        YAML::Store.new(filename)
     end
   end
 end
