@@ -83,6 +83,91 @@ RSpec.describe "Actions for Messages", :sqs do
     })
   end
 
+  describe "ReceiveMessage long polling" do
+    LONG_POLLING_QUEUE_NAME = 'test-long-polling'
+
+    before do
+      sqs.create_queue(
+        queue_name: LONG_POLLING_QUEUE_NAME,
+      )
+      sqs.set_queue_attributes(
+        queue_url: long_polling_queue_url,
+        attributes: {
+          "ReceiveMessageWaitTimeSeconds" => "1"
+        }
+      )
+    end
+
+    let(:long_polling_queue_url) { sqs.get_queue_url(queue_name: LONG_POLLING_QUEUE_NAME).queue_url }
+
+    specify "default behavior is no long polling" do
+      start = Time.now
+      response = sqs.receive_message(
+        queue_url: queue_url
+      )
+
+      expect(response.messages.size).to eq 0
+      expect(Time.now - start).to be < 0.5
+    end
+
+    specify "can configure long polling on queue" do
+      start = Time.now
+      response = sqs.receive_message(
+        queue_url: long_polling_queue_url
+      )
+
+      expect(response.messages.size).to eq 0
+      expect(Time.now - start).to be > 1
+    end
+
+    specify "specifying WaitTimeSeconds overrides queue configuration" do
+      start = Time.now
+      response = sqs.receive_message(
+        queue_url: queue_url,
+        wait_time_seconds: 1,
+      )
+
+      expect(response.messages.size).to eq 0
+      expect(Time.now - start).to be > 1
+
+      start = Time.now
+      response = sqs.receive_message(
+        queue_url: long_polling_queue_url,
+        wait_time_seconds: 2,
+      )
+
+      expect(response.messages.size).to eq 0
+      expect(Time.now - start).to be > 2
+
+      start = Time.now
+      response = sqs.receive_message(
+        queue_url: long_polling_queue_url,
+        wait_time_seconds: 0,
+      )
+
+      expect(response.messages.size).to eq 0
+      expect(Time.now - start).to be < 0.5
+    end
+
+    specify "a non-empty result immediately returns without waiting" do
+      body = "test 123"
+
+      sqs.send_message(
+        queue_url: queue_url,
+        message_body: body
+      )
+
+      start = Time.now
+      response = sqs.receive_message(
+        queue_url: queue_url,
+        wait_time_seconds: 1,
+      )
+
+      expect(response.messages.size).to eq 1
+      expect(Time.now - start).to be < 0.5
+    end
+  end
+
   specify "DeleteMessage" do
     sqs.send_message(
       queue_url: queue_url,

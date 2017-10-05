@@ -8,7 +8,7 @@ module FakeSQS
         @server    = options.fetch(:server)
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
-        @start_ts  = Time.now.to_i
+        @start_ts  = Time.now.to_f
         @satisfied = false
       end
 
@@ -46,7 +46,7 @@ module FakeSQS
 
       protected
       def elapsed
-        Time.now.to_i - @start_ts
+        Time.now.to_f - @start_ts
       end
 
       def expired?(queue, params)
