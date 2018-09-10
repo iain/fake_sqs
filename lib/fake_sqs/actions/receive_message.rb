@@ -2,10 +2,14 @@ module FakeSQS
   module Actions
     class ReceiveMessage
 
+      MAX_WAIT_TIME_SECONDS = 20
+
       def initialize(options = {})
         @server    = options.fetch(:server)
         @queues    = options.fetch(:queues)
         @responder = options.fetch(:responder)
+        @start_ts  = Time.now.to_f
+        @satisfied = false
       end
 
       def call(queue_name, params)
@@ -15,6 +19,7 @@ module FakeSQS
           filtered_attribute_names << value
         end
         messages = queue.receive_message(params.merge(queues: @queues))
+        @satisfied = !messages.empty? || expired?(queue, params)
         @responder.call :ReceiveMessage do |xml|
           messages.each do |receipt, message|
             xml.Message do
@@ -33,6 +38,24 @@ module FakeSQS
             end
           end
         end
+      end
+
+      def satisfied?
+        @satisfied
+      end
+
+      protected
+      def elapsed
+        Time.now.to_f - @start_ts
+      end
+
+      def expired?(queue, params)
+        wait_time_seconds = Integer params.fetch("WaitTimeSeconds") {
+          queue.queue_attributes.fetch("ReceiveMessageWaitTimeSeconds") { 0 }
+        }
+        wait_time_seconds <= 0 ||
+        elapsed >= wait_time_seconds ||
+        elapsed >= MAX_WAIT_TIME_SECONDS
       end
     end
   end
