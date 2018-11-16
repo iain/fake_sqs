@@ -11,7 +11,14 @@ module FakeSQS
 
       def call(params)
         name = params.fetch("QueueName")
-        queue = @queues.create(name, params)
+
+        # Extract any attributes into a simple hash structure
+        attributes = params.each_with_object({}) do |(key, value), attrs|
+          next unless key =~ /\AAttribute\.(\d+)\.Name\z/
+          attrs[value] = params.fetch("Attribute.#{$1}.Value")
+        end
+
+        queue = @queues.create(name, params.merge("Attributes" => attributes))
         @responder.call :CreateQueue do |xml|
           xml.QueueUrl @server.url_for(queue.name, {:host => @request.host, :port => @request.port})
         end
