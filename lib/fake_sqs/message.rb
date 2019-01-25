@@ -16,6 +16,7 @@ module FakeSQS
       @approximate_receive_count = 0
       @sent_timestamp = Time.now.to_i * 1000
       @delay_seconds = options.fetch("DelaySeconds", 0).to_i
+      @message_attributes = parse_message_attributes(options)
     end
 
     def expire!
@@ -53,9 +54,39 @@ module FakeSQS
       }
     end
 
+    def message_attributes
+      @message_attributes
+    end
+
     def receipt
       Digest::SHA1.hexdigest self.id
     end
 
+    private
+
+    def parse_message_attributes(options = {})
+      attrs = {}
+
+      index = 1
+      while true
+        name_key = "MessageAttribute.#{index}.Name"
+        break if not options.include?(name_key)
+
+        case options.fetch("MessageAttribute.#{index}.Value.DataType")
+        when "String", "Number"
+          attrs[options.fetch(name_key)] = {}
+          attrs[options.fetch(name_key)]['data_type'] = options.fetch("MessageAttribute.#{index}.Value.DataType")
+          attrs[options.fetch(name_key)]['string_value'] = options.fetch("MessageAttribute.#{index}.Value.StringValue")
+        when "Binary"
+          attrs[options.fetch(name_key)] = {}
+          attrs[options.fetch(name_key)]['data_type'] = options.fetch("MessageAttribute.#{index}.Value.DataType")
+          attrs[options.fetch(name_key)]['binary_value'] = options.fetch("MessageAttribute.#{index}.Value.BinaryValue")
+        else
+          # Only support String, Number, and Binary for now
+        end
+        index += 1
+      end
+      attrs
+    end
   end
 end

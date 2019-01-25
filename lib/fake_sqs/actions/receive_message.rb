@@ -35,6 +35,20 @@ module FakeSQS
                   end
                 end
               end
+              message.message_attributes.each do |name, data|
+                xml.MessageAttribute do
+                  xml.Name name
+                  xml.Value do
+                    xml.DataType data['data_type']
+                    case data['data_type']
+                    when "String", "Number"
+                      xml.StringValue data['string_value']
+                    when "Binary"
+                      xml.BinaryValue data['binary_value']
+                    end
+                  end
+                end
+              end
             end
           end
         end
