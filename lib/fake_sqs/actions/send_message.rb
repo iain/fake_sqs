@@ -13,6 +13,7 @@ module FakeSQS
         message = queue.send_message(params)
         @responder.call :SendMessage do |xml|
           xml.MD5OfMessageBody message.md5
+          xml.MD5OfMessageAttributes message.message_attributes_md5
           xml.MessageId message.id
         end
       end
