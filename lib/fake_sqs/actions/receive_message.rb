@@ -33,7 +33,7 @@ module FakeSQS
               xml.ReceiptHandle receipt
               xml.MD5OfBody message.md5
               xml.Body message.body
-
+              xml.MD5OfMessageAttributes message.message_attributes_md5
               message.attributes.each do |name, value|
                 if filtered_attribute_names.include?("All") || filtered_attribute_names.include?(name)
                   xml.Attribute do

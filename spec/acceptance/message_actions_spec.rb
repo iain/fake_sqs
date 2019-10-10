@@ -32,8 +32,7 @@ RSpec.describe "Actions for Messages", :sqs do
     received_message = sqs.receive_message(queue_url: queue_url, message_attribute_names: ["All"]).messages.first
 
     expect(sent_message.md5_of_message_attributes).to eq "e3a8318d4639138c2c6fdd04e1f69c8b"
-    # commented out as for some reason md5_of_message_attributes return nil
-    # expect(sent_message.md5_of_message_attributes).to eq received_message.md5_of_message_attributes
+    expect(sent_message.md5_of_message_attributes).to eq received_message.md5_of_message_attributes
 
     expect(received_message.message_attributes.keys).to eq ["foo_class"]
     message_attributes = received_message.message_attributes["foo_class"]
