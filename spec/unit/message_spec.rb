@@ -20,6 +20,51 @@ RSpec.describe FakeSQS::Message do
 
   end
 
+  describe "#message_attributes" do
+    it "has message attributes" do
+      body = {"MessageBody" => "abc"}
+      attributes = create_attributes [
+          {name: "one", string_value: "A String Value", data_type:"String"},
+          {name: "two", string_value: "35", data_type:"Number"},
+          {name: "three", binary_value: "c29tZSBiaW5hcnkgZGF0YQ==", data_type:"Binary"}
+      ]
+      message = create_message(body.merge attributes)
+
+      expect(message.message_attributes.size).to eq 3
+      expect(message.message_attributes_md5).to eq "6d31a67b8fa3c1a74d030c5de73fd7e2"
+    end
+
+    it "calculates string attribute md5" do
+      body = {"MessageBody" => "abc"}
+      attributes = create_attributes [
+          {name: "one", string_value: "A String Value", data_type:"String"}
+      ]
+      message = create_message(body.merge attributes)
+
+      expect(message.message_attributes_md5).to eq "88bb810f131daa54b83485598cc35693"
+    end
+
+    it "calculates number attribute md5" do
+      body = {"MessageBody" => "abc"}
+      attributes = create_attributes [
+        {name: "two", string_value: "35", data_type:"Number"}
+      ]
+      message = create_message(body.merge attributes)
+
+      expect(message.message_attributes_md5).to eq "7eb7af82e3ed82aef934e78b9ed11f12"
+    end
+
+    it "calculates binary attribute md5" do
+      body = {"MessageBody" => "abc"}
+      attributes = create_attributes [
+        {name: "three", binary_value: "c29tZSBiaW5hcnkgZGF0YQ==", data_type: "Binary"}
+      ]
+      message = create_message(body.merge attributes)
+
+      expect(message.message_attributes_md5).to eq "c0f297612d491707df87d6444ecb4817"
+    end
+  end
+
   describe "#id" do
 
     it "is generated" do
@@ -73,4 +118,16 @@ RSpec.describe FakeSQS::Message do
     FakeSQS::Message.new({"MessageBody" => "test"}.merge(options))
   end
 
+  def create_attributes(attributes = [])
+    result = {}
+
+    attributes.each_with_index do |attribute, index|
+      result["MessageAttribute.#{index+1}.Name"] = attribute[:name] if attribute[:name]
+      result["MessageAttribute.#{index+1}.Value.StringValue"] = attribute[:string_value] if attribute[:string_value]
+      result["MessageAttribute.#{index+1}.Value.BinaryValue"] = attribute[:binary_value] if attribute[:binary_value]
+      result["MessageAttribute.#{index+1}.Value.DataType"] = attribute[:data_type] if attribute[:data_type]
+    end
+
+    result
+  end
 end
